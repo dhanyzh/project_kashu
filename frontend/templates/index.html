@@ -1,137 +1,185 @@
 {% extends "base.html" %}
 
-{% block title %}Dashboard - Shreehari Finance{% endblock %}
+{% block title %}Operations Dashboard - Shreehari Finance{% endblock %}
 
 {% block content %}
-<div class="page-hero">
-    <div class="page-hero-text">
-        <h2>Executive Banking Overview</h2>
-        <p>Live financial position, aggregate liquidity, and real-time transaction ledger.</p>
+<!-- Page Title Bar -->
+<div class="page-title-bar">
+    <div class="page-heading">
+        <h1>Banking Operations Dashboard</h1>
+        <p>Real-time liquidity monitoring, active account volume, and core ledger activity.</p>
     </div>
-    <div style="display: flex; gap: 0.75rem;">
-        <a href="{{ url_for('transfer') }}" class="btn btn-primary">⚡ Quick Transfer</a>
-        <a href="{{ url_for('open_account') }}" class="btn btn-outline">+ Open Account</a>
+    <div class="page-actions">
+        <a href="{{ url_for('transfer') }}" class="btn btn-primary btn-sm">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <polyline points="17 1 21 5 17 9"></polyline>
+                <path d="M3 11V9a4 4 0 0 1 4-4h14"></path>
+                <polyline points="7 23 3 19 7 15"></polyline>
+                <path d="M21 13v2a4 4 0 0 1-4 4H3"></path>
+            </svg>
+            <span>Inter-Account Transfer</span>
+        </a>
+        <a href="{{ url_for('open_account') }}" class="btn btn-secondary btn-sm">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <line x1="12" y1="5" x2="12" y2="19"></line>
+                <line x1="5" y1="12" x2="19" y2="12"></line>
+            </svg>
+            <span>Open Account</span>
+        </a>
     </div>
 </div>
 
-<!-- 4 Modern Stat Cards -->
-<div class="metrics-row">
-    <div class="metric-card green">
-        <div class="metric-card-top">
-            <span class="metric-label">Total Deposits</span>
-            <div class="metric-icon-box" style="background: #ECFDF5; color: #10B981;">💰</div>
+<!-- 4 Key Banking Metrics -->
+<div class="metrics-grid">
+    <div class="metric-card">
+        <div class="metric-label">
+            <span>Total Aggregate Liquidity</span>
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <rect x="2" y="5" width="20" height="14" rx="2"></rect>
+                <line x1="2" y1="10" x2="22" y2="10"></line>
+            </svg>
         </div>
-        <div class="metric-value">₹{{ "{:,.2f}".format(total_balance) }}</div>
-        <div class="metric-subtitle">Across {{ total_accounts }} active bank accounts</div>
-    </div>
-
-    <div class="metric-card purple">
-        <div class="metric-card-top">
-            <span class="metric-label">Active Accounts</span>
-            <div class="metric-icon-box" style="background: #F3E8FF; color: #9333EA;">💳</div>
-        </div>
-        <div class="metric-value">{{ total_accounts }}</div>
-        <div class="metric-subtitle">Saving, Current &amp; Salary types</div>
+        <div class="metric-value num-tabular">₹{{ "{:,.2f}".format(total_balance) }}</div>
+        <div class="metric-meta">Across {{ total_accounts }} active customer accounts</div>
     </div>
 
     <div class="metric-card">
-        <div class="metric-card-top">
-            <span class="metric-label">Total Customers</span>
-            <div class="metric-icon-box" style="background: #EFF6FF; color: #3A86FF;">👥</div>
+        <div class="metric-label">
+            <span>Active Accounts</span>
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M4 15s1-1 4-1 5 2 8 2 4-1 4-1V3s-1 1-4 1-5-2-8-2-4 1-4 1z"></path>
+                <line x1="4" y1="22" x2="4" y2="15"></line>
+            </svg>
         </div>
-        <div class="metric-value">{{ total_customers }}</div>
-        <div class="metric-subtitle">Registered KYC account holders</div>
+        <div class="metric-value num-tabular">{{ total_accounts }}</div>
+        <div class="metric-meta">Savings, Current &amp; Salary classifications</div>
     </div>
 
-    <div class="metric-card amber">
-        <div class="metric-card-top">
-            <span class="metric-label">Transactions</span>
-            <div class="metric-icon-box" style="background: #FFFBEB; color: #F59E0B;">📑</div>
+    <div class="metric-card">
+        <div class="metric-label">
+            <span>Registered Customers</span>
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path>
+                <circle cx="9" cy="7" r="4"></circle>
+            </svg>
         </div>
-        <div class="metric-value">{{ total_txns }}</div>
-        <div class="metric-subtitle">Audited financial operations</div>
+        <div class="metric-value num-tabular">{{ total_customers }}</div>
+        <div class="metric-meta">KYC compliant account holders</div>
+    </div>
+
+    <div class="metric-card">
+        <div class="metric-label">
+            <span>Audited Transactions</span>
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <polyline points="22 12 18 12 15 21 9 3 6 12 2 12"></polyline>
+            </svg>
+        </div>
+        <div class="metric-value num-tabular">{{ total_txns }}</div>
+        <div class="metric-meta">Immutable entries in core database</div>
     </div>
 </div>
 
-<!-- Action Tiles Grid -->
-<div class="action-grid">
-    <a href="{{ url_for('open_account') }}" class="action-tile">
-        <div class="action-tile-icon">➕</div>
-        <div class="action-tile-info">
-            <h4>Open Account</h4>
-            <p>Register new customer &amp; issue account</p>
+<!-- Operations Quick Panel -->
+<div class="card" style="margin-bottom: 1.5rem;">
+    <div class="card-header">
+        <div class="card-title">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <circle cx="12" cy="12" r="3"></circle>
+                <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path>
+            </svg>
+            <span>Teller &amp; Counter Action Dispatch</span>
         </div>
-    </a>
+    </div>
+    <div class="card-body" style="padding: 1rem;">
+        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 0.75rem;">
+            <a href="{{ url_for('open_account') }}" class="btn btn-secondary" style="justify-content: flex-start; padding: 0.65rem 0.85rem;">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M16 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path>
+                    <circle cx="8.5" cy="7" r="4"></circle>
+                </svg>
+                <span>New Account Desk</span>
+            </a>
 
-    <a href="{{ url_for('deposit') }}" class="action-tile green">
-        <div class="action-tile-icon">📥</div>
-        <div class="action-tile-info">
-            <h4>Deposit Cash</h4>
-            <p>Credit funds to account</p>
-        </div>
-    </a>
+            <a href="{{ url_for('deposit') }}" class="btn btn-secondary" style="justify-content: flex-start; padding: 0.65rem 0.85rem;">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <line x1="12" y1="5" x2="12" y2="19"></line>
+                    <polyline points="19 12 12 19 5 12"></polyline>
+                </svg>
+                <span>Cash Deposit Counter</span>
+            </a>
 
-    <a href="{{ url_for('withdraw') }}" class="action-tile rose">
-        <div class="action-tile-icon">📤</div>
-        <div class="action-tile-info">
-            <h4>Withdraw Cash</h4>
-            <p>Debit cash with balance check</p>
-        </div>
-    </a>
+            <a href="{{ url_for('withdraw') }}" class="btn btn-secondary" style="justify-content: flex-start; padding: 0.65rem 0.85rem;">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <line x1="12" y1="19" x2="12" y2="5"></line>
+                    <polyline points="5 12 12 5 19 12"></polyline>
+                </svg>
+                <span>Cash Withdrawal</span>
+            </a>
 
-    <a href="{{ url_for('transfer') }}" class="action-tile purple">
-        <div class="action-tile-icon">🔄</div>
-        <div class="action-tile-info">
-            <h4>Fund Transfer</h4>
-            <p>Atomic transfer with ACID commit</p>
+            <a href="{{ url_for('transfer') }}" class="btn btn-secondary" style="justify-content: flex-start; padding: 0.65rem 0.85rem;">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <polyline points="17 1 21 5 17 9"></polyline>
+                    <path d="M3 11V9a4 4 0 0 1 4-4h14"></path>
+                </svg>
+                <span>Atomic Fund Transfer</span>
+            </a>
         </div>
-    </a>
+    </div>
 </div>
 
-<!-- Recent Transactions Panel -->
-<div class="panel-card">
-    <div class="panel-header">
-        <div class="panel-title">
-            <span>⏱️</span> Recent Transactions Activity
+<!-- Recent Transactions Table Panel -->
+<div class="card">
+    <div class="card-header">
+        <div class="card-title">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+                <polyline points="14 2 14 8 20 8"></polyline>
+            </svg>
+            <span>Recent Settlement Activity</span>
         </div>
-        <a href="{{ url_for('passbook') }}" class="btn btn-outline btn-sm">Full Passbook &rarr;</a>
+        <a href="{{ url_for('passbook') }}" class="btn btn-secondary btn-sm">View Full Passbook &rarr;</a>
     </div>
-    <div class="table-wrap">
+
+    <div class="table-responsive">
         <table>
             <thead>
                 <tr>
-                    <th>Date &amp; Time</th>
-                    <th>Reference No</th>
+                    <th>Timestamp</th>
+                    <th>Reference Number</th>
                     <th>Account No</th>
                     <th>Type</th>
-                    <th>Amount</th>
-                    <th>Description</th>
+                    <th class="text-right">Settled Amount</th>
+                    <th>Narration</th>
                 </tr>
             </thead>
             <tbody>
                 {% for t in recent_txns %}
                 <tr>
-                    <td style="font-size: 0.85rem; color: var(--text-muted);">
-                        {{ t.TransactionDate.strftime('%d-%b-%Y %H:%M') if t.TransactionDate else '-' }}
+                    <td class="num-tabular" style="color: var(--c-text-muted);">
+                        {{ t.TransactionDate.strftime('%d-%b-%Y %H:%M:%S') if t.TransactionDate else '-' }}
                     </td>
-                    <td class="mono" style="color: var(--brand-indigo);">{{ t.ReferenceNumber }}</td>
-                    <td class="mono"><strong>{{ t.AccountNumber }}</strong></td>
+                    <td>
+                        <span class="num-tabular" style="font-weight: 500; color: var(--c-navy);">{{ t.ReferenceNumber }}</span>
+                    </td>
+                    <td>
+                        <span class="num-tabular" style="font-weight: 600;">{{ t.AccountNumber }}</span>
+                    </td>
                     <td>
                         <span class="badge badge-{{ t.TransactionType|lower }}">
                             {{ t.TransactionType }}
                         </span>
                     </td>
-                    <td style="font-weight: 800; font-size: 0.95rem; color: {% if t.TransactionType in ['DEPOSIT', 'TRANSFER_IN'] %}var(--success){% else %}var(--danger){% endif %};">
+                    <td class="text-right num-tabular" style="font-weight: 600; color: {% if t.TransactionType in ['DEPOSIT', 'TRANSFER_IN'] %}var(--c-success){% else %}var(--c-danger){% endif %};">
                         {% if t.TransactionType in ['DEPOSIT', 'TRANSFER_IN'] %}+{% else %}-{% endif %}₹{{ "{:,.2f}".format(t.Amount) }}
                     </td>
-                    <td style="color: var(--text-muted); max-width: 250px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">
+                    <td style="color: var(--c-text-secondary); max-width: 280px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">
                         {{ t.Description or '-' }}
                     </td>
                 </tr>
                 {% else %}
                 <tr>
-                    <td colspan="6" style="text-align: center; color: var(--text-muted); padding: 2.5rem;">
-                        No transactions recorded yet.
+                    <td colspan="6" class="text-center" style="padding: 2rem; color: var(--c-text-muted);">
+                        No transactions recorded in the system yet.
                     </td>
                 </tr>
                 {% endfor %}

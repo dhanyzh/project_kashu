@@ -1,9 +1,42 @@
 // ====================================================================
-// SHREEHARI FINANCE - Interactive Client Enhancements
+// SHREEHARI FINANCE - Core Banking Operations Client Logic
 // ====================================================================
 
 document.addEventListener("DOMContentLoaded", () => {
-    // 1. Quick Amount Chips handler
+    // 1. Live System Clock in Topbar
+    const clockEl = document.getElementById("systemClock");
+    function updateClock() {
+        if (!clockEl) return;
+        const now = new Date();
+        const timeStr = now.toLocaleTimeString('en-IN', { hour12: false });
+        const dateStr = now.toLocaleDateString('en-IN', { day: '2-digit', month: 'short' });
+        clockEl.textContent = `${dateStr} ${timeStr}`;
+    }
+    if (clockEl) {
+        updateClock();
+        setInterval(updateClock, 1000);
+    }
+
+    // 2. Mobile Sidebar Navigation Toggle
+    const menuToggle = document.getElementById("menuToggle");
+    const appSidebar = document.getElementById("appSidebar");
+    if (menuToggle && appSidebar) {
+        menuToggle.addEventListener("click", () => {
+            appSidebar.classList.toggle("open");
+        });
+
+        // Close sidebar if clicked outside on mobile
+        document.addEventListener("click", (e) => {
+            if (window.innerWidth <= 900 && 
+                appSidebar.classList.contains("open") && 
+                !appSidebar.contains(e.target) && 
+                !menuToggle.contains(e.target)) {
+                appSidebar.classList.remove("open");
+            }
+        });
+    }
+
+    // 3. Currency Quick Amount Chips
     const chips = document.querySelectorAll(".amount-chip");
     const amountInput = document.getElementById("amount-input");
 
@@ -18,20 +51,7 @@ document.addEventListener("DOMContentLoaded", () => {
         });
     });
 
-    // 2. Radio Card selection visual state
-    const radioCards = document.querySelectorAll(".radio-card");
-    radioCards.forEach(card => {
-        card.addEventListener("click", () => {
-            radioCards.forEach(c => c.classList.remove("active"));
-            card.classList.add("active");
-            const radio = card.querySelector("input[type='radio']");
-            if (radio) {
-                radio.checked = true;
-            }
-        });
-    });
-
-    // 3. Deposit Dynamic Balance Projection
+    // 4. Deposit Dynamic Balance Projection
     const depositSelect = document.getElementById("deposit-account-select");
     const depositCurrentBal = document.getElementById("deposit-current-bal");
     const depositProjectedBal = document.getElementById("deposit-projected-bal");
@@ -55,7 +75,7 @@ document.addEventListener("DOMContentLoaded", () => {
         updateDepositPreview();
     }
 
-    // 4. Withdraw Dynamic Balance & Overdraft Warning
+    // 5. Withdraw Dynamic Balance & Overdraft Protection Check
     const withdrawSelect = document.getElementById("withdraw-account-select");
     const withdrawCurrentBal = document.getElementById("withdraw-current-bal");
     const withdrawProjectedBal = document.getElementById("withdraw-projected-bal");
@@ -75,10 +95,10 @@ document.addEventListener("DOMContentLoaded", () => {
             withdrawProjectedBal.textContent = `₹${remaining.toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
 
             if (amt > currentBal && amt > 0) {
-                withdrawProjectedBal.style.color = "#dc2626";
+                withdrawProjectedBal.style.color = "var(--c-danger)";
                 if (withdrawWarning) withdrawWarning.style.display = "block";
             } else {
-                withdrawProjectedBal.style.color = "#047857";
+                withdrawProjectedBal.style.color = "var(--c-success)";
                 if (withdrawWarning) withdrawWarning.style.display = "none";
             }
         }
@@ -90,7 +110,7 @@ document.addEventListener("DOMContentLoaded", () => {
         updateWithdrawPreview();
     }
 
-    // 5. Transfer Sender Balance Preview
+    // 6. Transfer Sender Balance Preview
     const senderSelect = document.getElementById("sender-account-select");
     const balancePreview = document.getElementById("available-balance-display");
 
@@ -111,7 +131,7 @@ document.addEventListener("DOMContentLoaded", () => {
         updateSenderBalancePreview();
     }
 
-    // 6. Live Loan EMI Calculator
+    // 7. Live Loan EMI Calculator
     const loanAmtInput = document.getElementById("loan-amount-input");
     const loanRateInput = document.getElementById("loan-rate-input");
     const loanTenureInput = document.getElementById("loan-tenure-input");
@@ -129,7 +149,6 @@ document.addEventListener("DOMContentLoaded", () => {
         }
 
         const R = (annualRate / 12) / 100;
-        // EMI formula: [P * R * (1+R)^N] / [(1+R)^N - 1]
         const emi = (P * R * Math.pow(1 + R, N)) / (Math.pow(1 + R, N) - 1);
         if (!isNaN(emi) && isFinite(emi)) {
             emiDisplay.textContent = `₹${Math.round(emi).toLocaleString('en-IN')} / mo`;
@@ -143,18 +162,18 @@ document.addEventListener("DOMContentLoaded", () => {
         calculateEMI();
     }
 
-    // 7. Auto dismiss alert banners
+    // 8. Auto dismiss alerts after 5 seconds
     const alerts = document.querySelectorAll(".alert-banner");
     alerts.forEach(alert => {
         setTimeout(() => {
-            alert.style.transition = "opacity 0.4s ease, transform 0.4s ease";
+            alert.style.transition = "opacity 0.2s ease, transform 0.2s ease";
             alert.style.opacity = "0";
-            alert.style.transform = "translateY(-6px)";
-            setTimeout(() => alert.remove(), 400);
+            alert.style.transform = "translateY(-4px)";
+            setTimeout(() => alert.remove(), 200);
         }, 5000);
     });
 
-    // 8. Instant Client Table Filter (for fast search)
+    // 9. Instant Live Table Filtering
     const clientFilterInput = document.getElementById("table-live-search");
     if (clientFilterInput) {
         clientFilterInput.addEventListener("input", (e) => {

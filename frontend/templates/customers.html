@@ -3,133 +3,128 @@
 {% block title %}Customers Directory - Shreehari Finance{% endblock %}
 
 {% block content %}
-<div class="page-header">
-    <div class="page-title">
-        <h2>Customer &amp; Account Directory</h2>
-        <p>Relational mapping across <code>CUSTOMER</code>, <code>ACCOUNT_HOLDER</code>, and <code>ACCOUNT</code> tables.</p>
+<div class="page-title-bar">
+    <div class="page-heading">
+        <h1>Customer &amp; Account Directory</h1>
+        <p>Enterprise customer relationship index and associated branch account holdings.</p>
     </div>
-    <div style="display: flex; gap: 0.6rem;">
-        <a href="{{ url_for('open_account') }}" class="btn btn-primary">
-            <span>+</span> Open New Account
+    <div class="page-actions">
+        <a href="{{ url_for('open_account') }}" class="btn btn-primary btn-sm">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M16 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path>
+                <circle cx="8.5" cy="7" r="4"></circle>
+                <line x1="20" y1="8" x2="20" y2="14"></line>
+                <line x1="23" y1="11" x2="17" y2="11"></line>
+            </svg>
+            <span>Open New Account</span>
         </a>
     </div>
 </div>
 
-<!-- Instant Live Search & Filter Bar -->
-<div class="panel" style="margin-bottom: 1.5rem;">
-    <div class="panel-body" style="padding: 1.25rem 1.75rem;">
-        <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 1rem;">
-            <div style="display: flex; align-items: center; gap: 0.6rem; flex: 1; max-width: 450px;">
-                <label style="margin: 0; font-size: 0.85rem; color: var(--text-muted); white-space: nowrap;">Search Customers:</label>
-                <input type="text" id="table-live-search" placeholder="Type customer name, phone, city, or account..." style="width: 100%; padding: 0.55rem 0.9rem;">
+<!-- Instant Client Search Bar -->
+<div class="card" style="margin-bottom: 1.25rem;">
+    <div class="card-body" style="padding: 0.85rem 1.25rem;">
+        <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 0.75rem;">
+            <div style="display: flex; align-items: center; gap: 0.5rem; flex: 1; max-width: 420px;">
+                <label for="table-live-search" style="margin: 0; font-size: 0.775rem; white-space: nowrap;">Search Customers:</label>
+                <input type="text" id="table-live-search" placeholder="Filter by name, mobile, city, or account..." style="width: 100%; padding: 0.4rem 0.65rem; font-size: 0.775rem;">
             </div>
-
-            <div style="display: flex; gap: 0.75rem; align-items: center;">
-                <span class="badge badge-pill-role">{{ customers|length }} Records</span>
-            </div>
+            <div class="badge badge-neutral num-tabular">{{ customers|length }} Total Records</div>
         </div>
     </div>
 </div>
 
 <!-- Customers Table Panel -->
-<div class="panel">
-    <div class="panel-header">
-        <span class="panel-title">
-            <span>👥</span> Registered Customers &amp; Linked Accounts
-        </span>
-        <span class="badge badge-active">Live RDBMS State</span>
+<div class="card">
+    <div class="card-header">
+        <div class="card-title">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path>
+                <circle cx="9" cy="7" r="4"></circle>
+            </svg>
+            <span>Master Customer Register</span>
+        </div>
+        <span class="badge badge-success">InnoDB State</span>
     </div>
 
-    <div class="table-wrap">
+    <div class="table-responsive">
         <table>
             <thead>
                 <tr>
-                    <th>Customer</th>
+                    <th>Customer Identifier</th>
+                    <th>Full Legal Name</th>
                     <th>Contact Details</th>
-                    <th>Location</th>
+                    <th>City</th>
                     <th>Account No</th>
                     <th>Type &amp; Branch</th>
-                    <th style="text-align: right;">Current Balance</th>
+                    <th class="text-right">Ledger Balance</th>
                     <th>Status</th>
-                    <th>Actions</th>
+                    <th>Action</th>
                 </tr>
             </thead>
             <tbody>
                 {% for c in customers %}
                 <tr>
-                    <td>
-                        <div style="display: flex; align-items: center; gap: 0.75rem;">
-                            <span class="avatar avatar-md {% if loop.index % 4 == 0 %}avatar-emerald{% elif loop.index % 4 == 1 %}avatar-amber{% elif loop.index % 4 == 2 %}avatar-rose{% else %}avatar-cyan{% endif %}">
-                                {{ c.FullName[:2].upper() if c.FullName else 'CU' }}
-                            </span>
-                            <div>
-                                <div style="font-weight: 800; font-size: 0.95rem; color: var(--brand-navy);">
-                                    {{ c.FullName }}
-                                </div>
-                                <div class="mono" style="font-size: 0.75rem; color: var(--text-muted);">
-                                    ID: #CUST-{{ c.CustomerID }}
-                                </div>
-                            </div>
-                        </div>
+                    <td class="num-tabular" style="color: var(--c-text-muted);">
+                        #CUST-{{ c.CustomerID }}
+                    </td>
+                    <td style="font-weight: 600; color: var(--c-navy);">
+                        {{ c.FullName }}
                     </td>
                     <td>
-                        <div style="font-size: 0.85rem; font-weight: 600;">{{ c.Mobile }}</div>
-                        <div style="font-size: 0.75rem; color: var(--text-muted);">{{ c.Email }}</div>
+                        <div class="num-tabular" style="font-size: 0.775rem;">{{ c.Mobile }}</div>
+                        <div style="font-size: 0.725rem; color: var(--c-text-muted);">{{ c.Email }}</div>
                     </td>
-                    <td>
-                        <span style="font-size: 0.85rem; font-weight: 500;">
-                            📍 {{ c.City }}
-                        </span>
+                    <td style="color: var(--c-text-secondary);">
+                        {{ c.City }}
                     </td>
                     <td>
                         {% if c.AccountNumber %}
-                        <span class="mono" style="background: #F1F5F9; padding: 0.25rem 0.6rem; border-radius: 4px; font-weight: 700; color: #1E293B;">
-                            {{ c.AccountNumber }}
-                        </span>
+                        <span class="num-tabular" style="font-weight: 600; color: var(--c-navy);">{{ c.AccountNumber }}</span>
                         {% else %}
-                        <span style="color: var(--text-light); font-size: 0.85rem;">No Active Account</span>
+                        <span style="color: var(--c-text-light); font-size: 0.75rem;">No Account</span>
                         {% endif %}
                     </td>
                     <td>
                         {% if c.AccountType %}
-                        <div style="font-weight: 700; font-size: 0.85rem;">{{ c.AccountType }}</div>
-                        <div style="font-size: 0.75rem; color: var(--text-muted);">{{ c.BranchName }}</div>
+                        <div style="font-weight: 500;">{{ c.AccountType }}</div>
+                        <div style="font-size: 0.725rem; color: var(--c-text-muted);">{{ c.BranchName }}</div>
                         {% else %}
-                        <span style="color: var(--text-light);">-</span>
+                        <span style="color: var(--c-text-light);">-</span>
                         {% endif %}
                     </td>
-                    <td style="text-align: right; font-weight: 800; font-family: 'JetBrains Mono', monospace; font-size: 1rem; color: var(--brand-navy);">
+                    <td class="text-right num-tabular" style="font-weight: 600; color: var(--c-navy);">
                         {% if c.Balance is not none %}
                         ₹{{ "{:,.2f}".format(c.Balance) }}
                         {% else %}
-                        <span style="color: var(--text-light);">-</span>
+                        <span style="color: var(--c-text-light);">-</span>
                         {% endif %}
                     </td>
                     <td>
-                        {% if c.Status %}
-                        <span class="badge badge-active">
-                            ✓ {{ c.Status }}
-                        </span>
+                        {% if c.Status == 'Active' %}
+                        <span class="badge badge-success">Active</span>
+                        {% elif c.Status %}
+                        <span class="badge badge-neutral">{{ c.Status }}</span>
                         {% else %}
-                        <span class="badge" style="background: #F1F5F9; color: #64748B;">Pending</span>
+                        <span class="badge badge-neutral">Unassigned</span>
                         {% endif %}
                     </td>
                     <td>
                         {% if c.AccountNumber %}
-                        <a href="{{ url_for('passbook', account_number=c.AccountNumber) }}" class="btn btn-outline btn-sm" style="font-size: 0.75rem; padding: 0.3rem 0.6rem;">
-                            Passbook &rarr;
+                        <a href="{{ url_for('passbook', account_number=c.AccountNumber) }}" class="btn btn-outline btn-sm" style="padding: 0.2rem 0.5rem; font-size: 0.725rem;">
+                            Passbook
                         </a>
                         {% else %}
-                        <a href="{{ url_for('open_account') }}" class="btn btn-primary btn-sm" style="font-size: 0.75rem; padding: 0.3rem 0.6rem;">
-                            + Open
+                        <a href="{{ url_for('open_account') }}" class="btn btn-primary btn-sm" style="padding: 0.2rem 0.5rem; font-size: 0.725rem;">
+                            Add Acc
                         </a>
                         {% endif %}
                     </td>
                 </tr>
                 {% else %}
                 <tr>
-                    <td colspan="8" style="text-align: center; color: var(--text-muted); padding: 3rem;">
-                        <p style="font-weight: 600;">No customer records found.</p>
+                    <td colspan="9" class="text-center" style="padding: 2.5rem; color: var(--c-text-muted);">
+                        No customer accounts found in database.
                     </td>
                 </tr>
                 {% endfor %}

@@ -3,50 +3,54 @@
 {% block title %}Loan Portfolio - Shreehari Finance{% endblock %}
 
 {% block content %}
-<div class="page-header">
-    <div class="page-title">
-        <h2>Loan Portfolio &amp; Repayment Management</h2>
-        <p>Manage credit facility sanctioning, interest computation, and automated loan closure triggers.</p>
+<div class="page-title-bar">
+    <div class="page-heading">
+        <h1>Credit Facility &amp; Loan Portfolio Management</h1>
+        <p>Underwriting, disbursement, and automated repayment tracking with trigger-based loan closures.</p>
     </div>
 </div>
 
 <!-- Forms 2-Column Grid -->
-<div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(360px, 1fr)); gap: 1.5rem; margin-bottom: 2rem;">
+<div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(350px, 1fr)); gap: 1.25rem; margin-bottom: 1.5rem;">
     
     <!-- 1. Sanction New Loan -->
-    <div class="panel" style="margin-bottom: 0;">
-        <div class="panel-header">
-            <span class="panel-title">
-                <span>📋</span> Sanction New Credit Facility
-            </span>
-            <span class="badge badge-deposit">New Application</span>
+    <div class="card" style="margin-bottom: 0;">
+        <div class="card-header">
+            <div class="card-title">
+                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <rect x="2" y="7" width="20" height="14" rx="2" ry="2"></rect>
+                    <path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"></path>
+                </svg>
+                <span>Sanction Credit Facility</span>
+            </div>
+            <span class="badge badge-neutral">New Agreement</span>
         </div>
 
-        <div class="panel-body">
+        <div class="card-body">
             <form method="POST" action="{{ url_for('loans') }}">
                 <input type="hidden" name="action" value="apply">
 
-                <div class="form-field" style="margin-bottom: 1.25rem;">
-                    <label>Borrower (Customer) <span class="required">*</span></label>
-                    <select name="customer_id" required>
-                        <option value="">-- Choose Eligible Borrower --</option>
+                <div class="form-group" style="margin-bottom: 1rem;">
+                    <label for="borrower-select">Borrower Account Holder <span class="required">*</span></label>
+                    <select name="customer_id" id="borrower-select" required>
+                        <option value="">-- Choose Customer --</option>
                         {% for c in customers %}
-                        <option value="{{ c.CustomerID }}">{{ c.Name }} (ID: #{{ c.CustomerID }})</option>
+                        <option value="{{ c.CustomerID }}">{{ c.Name }} (#CUST-{{ c.CustomerID }})</option>
                         {% endfor %}
                     </select>
                 </div>
 
-                <div class="form-field" style="margin-bottom: 1.25rem;">
-                    <label>Disbursing Branch <span class="required">*</span></label>
-                    <select name="branch_id" required>
+                <div class="form-group" style="margin-bottom: 1rem;">
+                    <label for="branch-select">Disbursing Branch <span class="required">*</span></label>
+                    <select name="branch_id" id="branch-select" required>
                         {% for b in branches %}
                         <option value="{{ b.BranchID }}">{{ b.BranchName }}</option>
                         {% endfor %}
                     </select>
                 </div>
 
-                <div class="form-field" style="margin-bottom: 1.25rem;">
-                    <label>Loan Product Type <span class="required">*</span></label>
+                <div class="form-group" style="margin-bottom: 1rem;">
+                    <label for="loan-product-type">Loan Product Specification <span class="required">*</span></label>
                     <select name="loan_type" id="loan-product-type" required>
                         <option value="Home Loan" data-rate="7.25">Home Loan (7.25% p.a.)</option>
                         <option value="Education Loan" data-rate="6.75">Education Loan (6.75% p.a.)</option>
@@ -55,9 +59,10 @@
                     </select>
                 </div>
 
-                <div class="form-field" style="margin-bottom: 1.25rem;">
-                    <label>Sanction Amount (₹) <span class="required">*</span></label>
-                    <input type="number" step="1000" min="5000" name="amount" id="loan-amount-input" value="100000" required placeholder="e.g. 200000" style="font-size: 1.05rem; font-weight: 700; font-family: 'JetBrains Mono', monospace;">
+                <div class="form-group" style="margin-bottom: 1rem;">
+                    <label for="loan-amount-input">Principal Sanction Amount (₹) <span class="required">*</span></label>
+                    <input type="number" step="1000" min="5000" name="amount" id="loan-amount-input" value="100000" required class="num-tabular" style="font-weight: 600;">
+                    
                     <div class="quick-amount-chips">
                         <span class="amount-chip" onclick="document.getElementById('loan-amount-input').value='50000'; document.getElementById('loan-amount-input').dispatchEvent(new Event('input'));">₹50K</span>
                         <span class="amount-chip" onclick="document.getElementById('loan-amount-input').value='100000'; document.getElementById('loan-amount-input').dispatchEvent(new Event('input'));">₹1 Lakh</span>
@@ -66,66 +71,82 @@
                     </div>
                 </div>
 
-                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-bottom: 1.25rem;">
-                    <div class="form-field">
-                        <label>Interest Rate (% p.a.)</label>
-                        <input type="number" step="0.05" name="rate" id="loan-rate-input" value="7.25" required>
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 0.75rem; margin-bottom: 1rem;">
+                    <div class="form-group">
+                        <label for="loan-rate-input">Interest Rate (% p.a.)</label>
+                        <input type="number" step="0.05" name="rate" id="loan-rate-input" value="7.25" required class="num-tabular">
                     </div>
-                    <div class="form-field">
-                        <label>Tenure (Months)</label>
-                        <input type="number" step="1" min="6" max="360" name="tenure" id="loan-tenure-input" value="36" required>
+                    <div class="form-group">
+                        <label for="loan-tenure-input">Tenure (Months)</label>
+                        <input type="number" step="1" min="6" max="360" name="tenure" id="loan-tenure-input" value="36" required class="num-tabular">
                     </div>
                 </div>
 
-                <!-- Dynamic EMI Estimator Box -->
-                <div class="emi-estimator-box" style="margin-bottom: 1.5rem;">
+                <!-- EMI Calculation Box -->
+                <div class="balance-preview-box" style="margin-bottom: 1.25rem;">
                     <div>
-                        <div class="emi-label">Estimated Monthly Installment (EMI)</div>
-                        <div style="font-size: 0.72rem; color: #4F46E5;">Standard Reducing Balance Method</div>
+                        <span class="label">Estimated Monthly Installment (EMI)</span>
+                        <div style="font-size: 0.7rem; color: var(--c-text-muted);">Standard Reducing Balance Method</div>
                     </div>
-                    <div class="emi-value" id="calculated-emi-display">₹3,099 / mo</div>
+                    <span class="amount num-tabular" id="calculated-emi-display" style="color: var(--c-navy);">₹3,099 / mo</span>
                 </div>
 
-                <button type="submit" class="btn btn-primary" style="width: 100%; padding: 0.85rem;">
-                    <span>✓</span> Sanction Loan Agreement
+                <button type="submit" class="btn btn-primary" style="width: 100%;">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <polyline points="20 6 9 17 4 12"></polyline>
+                    </svg>
+                    <span>Execute Loan Sanction</span>
                 </button>
             </form>
         </div>
     </div>
 
-    <!-- 2. Record Loan Repayment (EMI) -->
-    <div class="panel" style="margin-bottom: 0;">
-        <div class="panel-header">
-            <span class="panel-title">
-                <span>💳</span> Record Loan Repayment (EMI)
-            </span>
-            <span class="badge badge-active">Collection Counter</span>
+    <!-- 2. Record Loan Repayment -->
+    <div class="card" style="margin-bottom: 0;">
+        <div class="card-header">
+            <div class="card-title">
+                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <line x1="12" y1="5" x2="12" y2="19"></line>
+                    <polyline points="19 12 12 19 5 12"></polyline>
+                </svg>
+                <span>Record Repayment Installment</span>
+            </div>
+            <span class="badge badge-success">Collection Desk</span>
         </div>
 
-        <div class="panel-body">
-            <div class="dbms-note-card" style="margin-bottom: 1.25rem; font-size: 0.8rem; padding: 0.75rem 1rem;">
-                <strong><span>⚙️</span> Database Trigger Automation</strong>
-                When cumulative repayments match or exceed principal, trigger <code>trg_check_loan_completion</code> updates loan status to <code>Closed</code>!
+        <div class="card-body">
+            <div class="dbms-note-card" style="margin-bottom: 1rem; font-size: 0.75rem; padding: 0.65rem 0.85rem;">
+                <strong>
+                    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <circle cx="12" cy="12" r="10"></circle>
+                        <line x1="12" y1="16" x2="12" y2="12"></line>
+                    </svg>
+                    <span>Automated Trigger Execution</span>
+                </strong>
+                <span>
+                    When cumulative repayments match or exceed principal, database trigger <code>trg_check_loan_completion</code> marks the loan contract <code>Closed</code> automatically.
+                </span>
             </div>
 
             <form method="POST" action="{{ url_for('loans') }}">
                 <input type="hidden" name="action" value="pay">
 
-                <div class="form-field" style="margin-bottom: 1.25rem;">
-                    <label>Select Loan Account <span class="required">*</span></label>
-                    <select name="loan_id" required>
+                <div class="form-group" style="margin-bottom: 1rem;">
+                    <label for="loan-account-select">Select Loan Account <span class="required">*</span></label>
+                    <select name="loan_id" id="loan-account-select" required>
                         <option value="">-- Choose Loan Contract --</option>
                         {% for l in loans %}
                         <option value="{{ l.LoanID }}">
-                            #LN-{{ l.LoanID }} — {{ l.BorrowerName }} ({{ l.LoanType }} | Remaining: ₹{{ "{:,.2f}".format(l.Outstanding) }})
+                            #LN-{{ l.LoanID }} &mdash; {{ l.BorrowerName }} ({{ l.LoanType }} | Remaining: ₹{{ "{:,.2f}".format(l.Outstanding) }})
                         </option>
                         {% endfor %}
                     </select>
                 </div>
 
-                <div class="form-field" style="margin-bottom: 1.25rem;">
-                    <label>Repayment Amount (₹) <span class="required">*</span></label>
-                    <input type="number" step="0.01" min="1" name="amount" id="repay-amount-input" required placeholder="Enter repayment or EMI amount" style="font-size: 1.05rem; font-weight: 700; font-family: 'JetBrains Mono', monospace;">
+                <div class="form-group" style="margin-bottom: 1rem;">
+                    <label for="repay-amount-input">Repayment Amount (₹) <span class="required">*</span></label>
+                    <input type="number" step="0.01" min="1" name="amount" id="repay-amount-input" required placeholder="0.00" class="num-tabular" style="font-weight: 600;">
+                    
                     <div class="quick-amount-chips">
                         <span class="amount-chip" onclick="document.getElementById('repay-amount-input').value='2500';">₹2,500</span>
                         <span class="amount-chip" onclick="document.getElementById('repay-amount-input').value='5000';">₹5,000</span>
@@ -134,44 +155,52 @@
                     </div>
                 </div>
 
-                <div class="form-field" style="margin-bottom: 2rem;">
-                    <label>Payment Channel</label>
-                    <select name="payment_mode">
-                        <option value="NetBanking">NetBanking / Direct Debit</option>
-                        <option value="UPI">UPI AutoPay / QR</option>
+                <div class="form-group" style="margin-bottom: 1.5rem;">
+                    <label for="payment-mode-select">Settlement Channel</label>
+                    <select name="payment_mode" id="payment-mode-select">
+                        <option value="NetBanking">NetBanking / Direct Transfer</option>
+                        <option value="UPI">UPI AutoPay Settlement</option>
                         <option value="Cash">Cash at Counter</option>
-                        <option value="Cheque">Cheque Deposit</option>
+                        <option value="Cheque">Cheque Clearing</option>
                     </select>
                 </div>
 
-                <button type="submit" class="btn btn-success" style="width: 100%; padding: 0.85rem;">
-                    <span>✓</span> Record Repayment Installment
+                <button type="submit" class="btn btn-success" style="width: 100%;">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <polyline points="20 6 9 17 4 12"></polyline>
+                    </svg>
+                    <span>Post Repayment Entry</span>
                 </button>
             </form>
         </div>
     </div>
+
 </div>
 
 <!-- Sanctioned Loans Portfolio Table -->
-<div class="panel">
-    <div class="panel-header">
-        <span class="panel-title">
-            <span>🏛️</span> Active &amp; Settled Loan Portfolio
-        </span>
-        <span class="badge badge-pill-role">{{ loans|length }} Contracts</span>
+<div class="card">
+    <div class="card-header">
+        <div class="card-title">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <rect x="2" y="7" width="20" height="14" rx="2" ry="2"></rect>
+                <path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"></path>
+            </svg>
+            <span>Active &amp; Settled Credit Contracts</span>
+        </div>
+        <span class="badge badge-neutral num-tabular">{{ loans|length }} Contracts</span>
     </div>
 
-    <div class="table-wrap">
+    <div class="table-responsive">
         <table>
             <thead>
                 <tr>
-                    <th>Loan ID</th>
+                    <th>Loan Ref</th>
                     <th>Borrower Name</th>
                     <th>Product &amp; Branch</th>
-                    <th style="text-align: right;">Principal Amount</th>
-                    <th>Rate &amp; Tenure</th>
+                    <th class="text-right">Principal</th>
+                    <th>Rate &amp; Term</th>
                     <th>Repayment Progress</th>
-                    <th style="text-align: right;">Outstanding</th>
+                    <th class="text-right">Outstanding</th>
                     <th>Status</th>
                 </tr>
             </thead>
@@ -181,29 +210,23 @@
                 {% if percent_paid > 100 %}{% set percent_paid = 100 %}{% endif %}
                 <tr>
                     <td>
-                        <span class="mono" style="font-weight: 700; color: var(--brand-indigo);">#LN-{{ l.LoanID }}</span>
+                        <span class="num-tabular" style="font-weight: 600; color: var(--c-navy);">#LN-{{ l.LoanID }}</span>
+                    </td>
+                    <td style="font-weight: 600;">
+                        {{ l.BorrowerName }}
                     </td>
                     <td>
-                        <div style="display: flex; align-items: center; gap: 0.6rem;">
-                            <span class="avatar avatar-sm avatar-indigo">
-                                {{ l.BorrowerName[:2].upper() if l.BorrowerName else 'LO' }}
-                            </span>
-                            <span style="font-weight: 700; color: var(--brand-navy);">{{ l.BorrowerName }}</span>
-                        </div>
+                        <div>{{ l.LoanType }}</div>
+                        <div style="font-size: 0.725rem; color: var(--c-text-muted);">{{ l.BranchName }}</div>
                     </td>
-                    <td>
-                        <div style="font-weight: 700; font-size: 0.85rem;">{{ l.LoanType }}</div>
-                        <div style="font-size: 0.75rem; color: var(--text-muted);">{{ l.BranchName }}</div>
-                    </td>
-                    <td style="text-align: right; font-weight: 800; font-family: 'JetBrains Mono', monospace; font-size: 0.95rem;">
+                    <td class="text-right num-tabular" style="font-weight: 600;">
                         ₹{{ "{:,.2f}".format(l.LoanAmount) }}
                     </td>
-                    <td>
-                        <div style="font-size: 0.85rem; font-weight: 600;">{{ l.InterestRate }}% p.a.</div>
-                        <div style="font-size: 0.75rem; color: var(--text-muted);">{{ l.TenureMonths }} Months</div>
+                    <td class="num-tabular" style="font-size: 0.775rem;">
+                        {{ l.InterestRate }}% p.a. ({{ l.TenureMonths }}m)
                     </td>
-                    <td style="min-width: 150px;">
-                        <div style="display: flex; justify-content: space-between; font-size: 0.75rem; font-weight: 700; color: var(--text-muted); margin-bottom: 2px;">
+                    <td style="min-width: 140px;">
+                        <div style="display: flex; justify-content: space-between; font-size: 0.7rem; color: var(--c-text-muted); margin-bottom: 2px;" class="num-tabular">
                             <span>₹{{ "{:,.0f}".format(l.TotalPaid) }}</span>
                             <span>{{ "{:.0f}".format(percent_paid) }}%</span>
                         </div>
@@ -211,21 +234,21 @@
                             <div class="progress-bar-fill" style="width: {{ percent_paid }}%;"></div>
                         </div>
                     </td>
-                    <td style="text-align: right; font-weight: 800; font-family: 'JetBrains Mono', monospace; font-size: 0.95rem; color: {% if l.Outstanding > 0 %}#EF4444{% else %}#10B981{% endif %};">
+                    <td class="text-right num-tabular" style="font-weight: 600; color: {% if l.Outstanding > 0 %}var(--c-danger){% else %}var(--c-success){% endif %};">
                         ₹{{ "{:,.2f}".format(l.Outstanding) }}
                     </td>
                     <td>
-                        {% if l.LoanStatus == 'Active' %}
-                        <span class="badge badge-active">Active</span>
+                        {% if l.LoanStatus == 'Active' or l.LoanStatus == 'Disbursed' %}
+                        <span class="badge badge-success">{{ l.LoanStatus }}</span>
                         {% else %}
-                        <span class="badge badge-deposit">Closed</span>
+                        <span class="badge badge-neutral">{{ l.LoanStatus }}</span>
                         {% endif %}
                     </td>
                 </tr>
                 {% else %}
                 <tr>
-                    <td colspan="8" style="text-align: center; color: var(--text-muted); padding: 3rem;">
-                        <p style="font-weight: 600;">No loans currently on file.</p>
+                    <td colspan="8" class="text-center" style="padding: 2.5rem; color: var(--c-text-muted);">
+                        No loan agreements recorded on file.
                     </td>
                 </tr>
                 {% endfor %}
@@ -235,7 +258,6 @@
 </div>
 
 <script>
-// Auto update interest rate preset when loan product changes
 document.getElementById('loan-product-type')?.addEventListener('change', function() {
     const selected = this.options[this.selectedIndex];
     const rate = selected.getAttribute('data-rate');

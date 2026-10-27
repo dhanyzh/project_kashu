@@ -3,72 +3,216 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>{% block title %}Shreehari Finance - Banking Management System{% endblock %}</title>
+    <title>{% block title %}Shreehari Finance - Core Banking Portal{% endblock %}</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
 </head>
 <body>
 
-    <!-- Header Navigation -->
-    <header class="navbar">
-        <div class="nav-container">
-            <a href="{{ url_for('home') }}" class="brand-wrapper">
-                <div class="brand-icon">🏛️</div>
-                <div class="brand-title">
-                    <h1>SHREEHARI FINANCE</h1>
-                    <span>Core Banking System</span>
-                </div>
-            </a>
+<div class="app-container">
 
-            <nav>
-                <ul class="nav-menu">
-                    <li class="nav-item"><a href="{{ url_for('home') }}" class="{% if active_page == 'home' %}active{% endif %}">📊 Dashboard</a></li>
-                    <li class="nav-item"><a href="{{ url_for('open_account') }}" class="{% if active_page == 'open_account' %}active{% endif %}">➕ Open Account</a></li>
-                    <li class="nav-item"><a href="{{ url_for('deposit') }}" class="{% if active_page == 'deposit' %}active{% endif %}">📥 Deposit</a></li>
-                    <li class="nav-item"><a href="{{ url_for('withdraw') }}" class="{% if active_page == 'withdraw' %}active{% endif %}">📤 Withdraw</a></li>
-                    <li class="nav-item"><a href="{{ url_for('transfer') }}" class="{% if active_page == 'transfer' %}active{% endif %}">🔄 Transfer</a></li>
-                    <li class="nav-item"><a href="{{ url_for('passbook') }}" class="{% if active_page == 'passbook' %}active{% endif %}">📑 Passbook</a></li>
-                    <li class="nav-item"><a href="{{ url_for('customers') }}" class="{% if active_page == 'customers' %}active{% endif %}">👥 Customers</a></li>
-                    <li class="nav-item"><a href="{{ url_for('loans') }}" class="{% if active_page == 'loans' %}active{% endif %}">💳 Loans</a></li>
+    <!-- 1. Enterprise Sidebar -->
+    <aside class="sidebar" id="appSidebar">
+        <div class="sidebar-header">
+            <div class="sidebar-logo">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <line x1="3" y1="21" x2="21" y2="21"></line>
+                    <line x1="3" y1="10" x2="21" y2="10"></line>
+                    <polyline points="5 6 12 3 19 6"></polyline>
+                    <line x1="4" y1="10" x2="4" y2="21"></line>
+                    <line x1="20" y1="10" x2="20" y2="21"></line>
+                    <line x1="8" y1="14" x2="8" y2="17"></line>
+                    <line x1="12" y1="14" x2="12" y2="17"></line>
+                    <line x1="16" y1="14" x2="16" y2="17"></line>
+                </svg>
+            </div>
+            <div class="sidebar-brand-text">
+                <span class="sidebar-brand-title">SHREEHARI FINANCE</span>
+                <span class="sidebar-brand-sub">Core Banking v3.2</span>
+            </div>
+        </div>
+
+        <nav class="sidebar-nav">
+            <!-- Navigation Group 1: Core Operations -->
+            <div>
+                <div class="nav-section-label">Operations</div>
+                <ul class="nav-group">
+                    <li>
+                        <a href="{{ url_for('home') }}" class="nav-link {% if active_page == 'home' %}active{% endif %}">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <rect x="3" y="3" width="7" height="7"></rect>
+                                <rect x="14" y="3" width="7" height="7"></rect>
+                                <rect x="14" y="14" width="7" height="7"></rect>
+                                <rect x="3" y="14" width="7" height="7"></rect>
+                            </svg>
+                            <span>Dashboard</span>
+                        </a>
+                    </li>
+                    <li>
+                        <a href="{{ url_for('open_account') }}" class="nav-link {% if active_page == 'open_account' %}active{% endif %}">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <path d="M16 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path>
+                                <circle cx="8.5" cy="7" r="4"></circle>
+                                <line x1="20" y1="8" x2="20" y2="14"></line>
+                                <line x1="23" y1="11" x2="17" y2="11"></line>
+                            </svg>
+                            <span>Open Account</span>
+                        </a>
+                    </li>
+                    <li>
+                        <a href="{{ url_for('deposit') }}" class="nav-link {% if active_page == 'deposit' %}active{% endif %}">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <line x1="12" y1="5" x2="12" y2="19"></line>
+                                <polyline points="19 12 12 19 5 12"></polyline>
+                            </svg>
+                            <span>Cash Deposit</span>
+                        </a>
+                    </li>
+                    <li>
+                        <a href="{{ url_for('withdraw') }}" class="nav-link {% if active_page == 'withdraw' %}active{% endif %}">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <line x1="12" y1="19" x2="12" y2="5"></line>
+                                <polyline points="5 12 12 5 19 12"></polyline>
+                            </svg>
+                            <span>Cash Withdrawal</span>
+                        </a>
+                    </li>
+                    <li>
+                        <a href="{{ url_for('transfer') }}" class="nav-link {% if active_page == 'transfer' %}active{% endif %}">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <polyline points="17 1 21 5 17 9"></polyline>
+                                <path d="M3 11V9a4 4 0 0 1 4-4h14"></path>
+                                <polyline points="7 23 3 19 7 15"></polyline>
+                                <path d="M21 13v2a4 4 0 0 1-4 4H3"></path>
+                            </svg>
+                            <span>Fund Transfer</span>
+                        </a>
+                    </li>
                 </ul>
-            </nav>
+            </div>
 
-            <div class="db-live-tag">
-                <div class="pulse-dot"></div>
-                <span>MySQL 8.0 Live</span>
+            <!-- Navigation Group 2: Ledgers & Records -->
+            <div>
+                <div class="nav-section-label">Ledgers &amp; Accounts</div>
+                <ul class="nav-group">
+                    <li>
+                        <a href="{{ url_for('passbook') }}" class="nav-link {% if active_page == 'passbook' %}active{% endif %}">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+                                <polyline points="14 2 14 8 20 8"></polyline>
+                                <line x1="16" y1="13" x2="8" y2="13"></line>
+                                <line x1="16" y1="17" x2="8" y2="17"></line>
+                                <polyline points="10 9 9 9 8 9"></polyline>
+                            </svg>
+                            <span>Passbook Ledger</span>
+                        </a>
+                    </li>
+                    <li>
+                        <a href="{{ url_for('customers') }}" class="nav-link {% if active_page == 'customers' %}active{% endif %}">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path>
+                                <circle cx="9" cy="7" r="4"></circle>
+                                <path d="M23 21v-2a4 4 0 0 0-3-3.87"></path>
+                                <path d="M16 3.13a4 4 0 0 1 0 7.75"></path>
+                            </svg>
+                            <span>Customers &amp; Accounts</span>
+                        </a>
+                    </li>
+                    <li>
+                        <a href="{{ url_for('loans') }}" class="nav-link {% if active_page == 'loans' %}active{% endif %}">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <rect x="2" y="7" width="20" height="14" rx="2" ry="2"></rect>
+                                <path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"></path>
+                            </svg>
+                            <span>Loan Portfolio</span>
+                        </a>
+                    </li>
+                </ul>
+            </div>
+        </nav>
+
+        <div class="sidebar-footer">
+            <div class="operator-badge">TR</div>
+            <div class="operator-info">
+                <span class="operator-name">Branch Terminal 01</span>
+                <span class="operator-role">Teller ID: #TR-402</span>
             </div>
         </div>
-    </header>
+    </aside>
 
-    <!-- Main Container -->
-    <main class="main-content">
-        <!-- Flash messages for Success or Errors -->
-        {% with messages = get_flashed_messages(with_categories=true) %}
-            {% if messages %}
-                {% for category, message in messages %}
-                    <div class="alert-banner alert-{{ category }}">
-                        <span>{{ message }}</span>
-                        <button type="button" style="background:none; border:none; cursor:pointer; font-size:1.2rem; color:inherit;" onclick="this.parentElement.remove()">&times;</button>
-                    </div>
-                {% endfor %}
-            {% endif %}
-        {% endwith %}
-
-        {% block content %}{% endblock %}
-    </main>
-
-    <!-- Footer -->
-    <footer>
-        <div class="footer-inner">
-            <div>
-                <strong>Shreehari Finance</strong> &mdash; 3-Tier Banking Management System
+    <!-- 2. Main Application Wrapper -->
+    <div class="main-wrapper">
+        
+        <!-- Top Navigation Bar -->
+        <header class="topbar">
+            <div class="topbar-left">
+                <button class="mobile-menu-toggle" id="menuToggle" aria-label="Toggle navigation">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <line x1="3" y1="12" x2="21" y2="12"></line>
+                        <line x1="3" y1="6" x2="21" y2="6"></line>
+                        <line x1="3" y1="18" x2="21" y2="18"></line>
+                    </svg>
+                </button>
+                <div class="breadcrumb">
+                    <span>Shreehari Finance</span>
+                    <span>/</span>
+                    <span class="breadcrumb-item active">
+                        {% if active_page == 'home' %}Dashboard
+                        {% elif active_page == 'open_account' %}Account Provisioning
+                        {% elif active_page == 'deposit' %}Cash Deposit Desk
+                        {% elif active_page == 'withdraw' %}Cash Withdrawal Desk
+                        {% elif active_page == 'transfer' %}Inter-Account Transfer
+                        {% elif active_page == 'passbook' %}Passbook Audit Ledger
+                        {% elif active_page == 'customers' %}Customer Directory
+                        {% elif active_page == 'loans' %}Loan Management
+                        {% else %}Portal
+                        {% endif %}
+                    </span>
+                </div>
             </div>
-            <div>
-                Built for DBMS Lab | B.Tech CSE (3rd Semester) | MySQL 8.0 + Flask
-            </div>
-        </div>
-    </footer>
 
-    <script src="{{ url_for('static', filename='js/main.js') }}"></script>
-    {% block scripts %}{% endblock %}
+            <div class="topbar-right">
+                <div class="system-status">
+                    <div class="status-dot"></div>
+                    <span>MySQL 8.0 &bull; Online</span>
+                </div>
+                <div style="font-size: 0.75rem; color: var(--c-text-muted); font-family: 'IBM Plex Mono', monospace;">
+                    <span id="systemClock">--:--:--</span>
+                </div>
+            </div>
+        </header>
+
+        <!-- Page Body Container -->
+        <main class="content-body">
+            <!-- Flash notification messages -->
+            {% with messages = get_flashed_messages(with_categories=true) %}
+                {% if messages %}
+                    {% for category, message in messages %}
+                        <div class="alert-banner alert-{{ category }}">
+                            <span>{{ message }}</span>
+                            <button type="button" style="background:none; border:none; cursor:pointer; font-size:1.1rem; color:inherit;" onclick="this.parentElement.remove()">&times;</button>
+                        </div>
+                    {% endfor %}
+                {% endif %}
+            {% endwith %}
+
+            {% block content %}{% endblock %}
+        </main>
+
+        <!-- Institutional Footer -->
+        <footer>
+            <div>
+                <strong>Shreehari Finance</strong> &mdash; Core Banking System &bull; Enterprise Operations Desk
+            </div>
+            <div style="font-family: 'IBM Plex Mono', monospace; font-size: 0.7rem;">
+                Host: 127.0.0.1:3306 &bull; Session: SECURE_ID_042
+            </div>
+        </footer>
+
+    </div>
+
+</div>
+
+<script src="{{ url_for('static', filename='js/main.js') }}"></script>
+{% block scripts %}{% endblock %}
 </body>
 </html>
