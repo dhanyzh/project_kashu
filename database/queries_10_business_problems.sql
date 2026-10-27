@@ -1,124 +1,89 @@
--- ====================================================================
--- PROJECT KASHI: 10 Meaningful Banking Business Problems & SQL Solutions
--- DBMS Course Project - B.Tech CSE (3rd Semester)
--- Demonstrating: Joins, Aggregation, Subqueries, HAVING, Views, Functions
--- ====================================================================
+-- Project Kashi: 10 SQL Business Queries
+-- Course: Database Management Systems Lab (3rd Sem B.Tech CSE)
+-- Database: project_kashi
 
 USE project_kashi;
 
--- --------------------------------------------------------------------
--- PROBLEM 1: High Net-Worth Customer Identification
--- Business Question:
--- "Who are the top 5 highest-balance customers across all their bank accounts?"
--- Concepts: JOIN, GROUP BY, SUM(), ORDER BY, LIMIT
--- --------------------------------------------------------------------
+-- -------------------------------------------------------------
+-- Query 1: Find top 5 customers with the highest total bank balance
+-- Concepts used: JOIN, GROUP BY, SUM, ORDER BY DESC, LIMIT
+-- -------------------------------------------------------------
 SELECT 
     c.CustomerID,
     CONCAT(c.FirstName, ' ', c.LastName) AS CustomerName,
     c.Mobile,
-    c.Email,
     c.City,
-    COUNT(a.AccountID) AS TotalAccountsOwned,
-    COALESCE(SUM(a.Balance), 0.00) AS TotalAggregateBalance
+    COUNT(a.AccountID) AS TotalAccounts,
+    SUM(a.Balance) AS TotalBalance
 FROM CUSTOMER c
 JOIN ACCOUNT_HOLDER ah ON c.CustomerID = ah.CustomerID
 JOIN ACCOUNT a ON ah.AccountID = a.AccountID
 WHERE a.Status = 'Active'
-GROUP BY c.CustomerID, c.FirstName, c.LastName, c.Mobile, c.Email, c.City
-ORDER BY TotalAggregateBalance DESC
+GROUP BY c.CustomerID, c.FirstName, c.LastName, c.Mobile, c.City
+ORDER BY TotalBalance DESC
 LIMIT 5;
 
--- --------------------------------------------------------------------
--- PROBLEM 2: Branch Financial Health & Liability Exposure
--- Business Question:
--- "For each branch, compare total customer deposits against total loan
---  amounts disbursed. Highlight branches where loans exceed deposits."
--- Concepts: Multi-table LEFT JOIN, Aggregation, CASE expression
--- --------------------------------------------------------------------
+-- -------------------------------------------------------------
+-- Query 2: Compare total customer deposits and total loans given per branch
+-- Concepts used: LEFT JOIN, Subqueries in FROM clause, COALESCE
+-- -------------------------------------------------------------
 SELECT 
-    b.BranchID,
     b.BranchName,
     b.City,
-    COALESCE(acc_data.TotalDeposits, 0.00) AS TotalDeposits,
-    COALESCE(loan_data.TotalLoansDisbursed, 0.00) AS TotalLoansDisbursed,
-    CASE 
-        WHEN COALESCE(loan_data.TotalLoansDisbursed, 0.00) > COALESCE(acc_data.TotalDeposits, 0.00) 
-        THEN 'HIGH EXPOSURE (Loans > Deposits)'
-        ELSE 'BALANCED (Healthy Liquidity)'
-    END AS LiquidityRiskStatus
+    COALESCE(SUM(a.Balance), 0) AS TotalDeposits,
+    COALESCE(l.TotalLoans, 0) AS TotalLoans
 FROM BRANCH b
+LEFT JOIN ACCOUNT a ON b.BranchID = a.BranchID
 LEFT JOIN (
-    SELECT BranchID, SUM(Balance) AS TotalDeposits 
-    FROM ACCOUNT 
-    WHERE Status = 'Active' 
-    GROUP BY BranchID
-) acc_data ON b.BranchID = acc_data.BranchID
-LEFT JOIN (
-    SELECT BranchID, SUM(LoanAmount) AS TotalLoansDisbursed 
+    SELECT BranchID, SUM(LoanAmount) AS TotalLoans 
     FROM LOAN 
-    WHERE LoanStatus IN ('Approved', 'Disbursed') 
     GROUP BY BranchID
-) loan_data ON b.BranchID = loan_data.BranchID
+) l ON b.BranchID = l.BranchID
+GROUP BY b.BranchID, b.BranchName, b.City, l.TotalLoans
 ORDER BY TotalDeposits DESC;
 
--- --------------------------------------------------------------------
--- PROBLEM 3: Dormant / Inactive Account Detection
--- Business Question:
--- "Identify all active accounts that have had NO transactions in the last
---  90 days or zero recorded transactions, so the bank can send alerts."
--- Concepts: NOT EXISTS / LEFT JOIN, Correlated Subquery, DATE_SUB
--- --------------------------------------------------------------------
+-- -------------------------------------------------------------
+-- Query 3: Find active accounts with no transactions in the last 90 days
+-- Concepts used: LEFT JOIN, HAVING, DATE_SUB, NULL checking
+-- -------------------------------------------------------------
 SELECT 
     a.AccountID,
     a.AccountNumber,
     a.AccountType,
     a.Balance,
-    CONCAT(c.FirstName, ' ', c.LastName) AS PrimaryHolder,
-    c.Mobile,
-    b.BranchName,
-    MAX(t.TransactionDate) AS LastTransactionDate
+    CONCAT(c.FirstName, ' ', c.LastName) AS OwnerName,
+    MAX(t.TransactionDate) AS LastTxnDate
 FROM ACCOUNT a
-JOIN BRANCH b ON a.BranchID = b.BranchID
-JOIN ACCOUNT_HOLDER ah ON a.AccountID = ah.AccountID AND ah.HolderType = 'Primary'
+JOIN ACCOUNT_HOLDER ah ON a.AccountID = ah.AccountID
 JOIN CUSTOMER c ON ah.CustomerID = c.CustomerID
 LEFT JOIN TRANSACTION t ON a.AccountID = t.AccountID
 WHERE a.Status = 'Active'
-GROUP BY a.AccountID, a.AccountNumber, a.AccountType, a.Balance, c.FirstName, c.LastName, c.Mobile, b.BranchName
-HAVING LastTransactionDate IS NULL OR LastTransactionDate < DATE_SUB(NOW(), INTERVAL 90 DAY)
-ORDER BY a.Balance DESC;
+GROUP BY a.AccountID, a.AccountNumber, a.AccountType, a.Balance, c.FirstName, c.LastName
+HAVING LastTxnDate IS NULL OR LastTxnDate < DATE_SUB(NOW(), INTERVAL 90 DAY);
 
--- --------------------------------------------------------------------
--- PROBLEM 4: Multi-Product Customers (Savings AND Loan Holders)
--- Business Question:
--- "Find all customers who hold both an active Savings account AND
---  have an active Loan with the bank."
--- Concepts: Subqueries with IN, INTERSECT emulation, Multiple Entity Mapping
--- --------------------------------------------------------------------
-SELECT 
+-- -------------------------------------------------------------
+-- Query 4: Find customers who have both a Savings Account and a Loan
+-- Concepts used: Subquery with IN, DISTINCT
+-- -------------------------------------------------------------
+SELECT DISTINCT 
     c.CustomerID,
     CONCAT(c.FirstName, ' ', c.LastName) AS CustomerName,
     c.Mobile,
-    c.City,
     l.LoanType,
-    l.LoanAmount,
-    l.LoanStatus
+    l.LoanAmount
 FROM CUSTOMER c
 JOIN LOAN l ON c.CustomerID = l.CustomerID
-WHERE l.LoanStatus IN ('Approved', 'Disbursed')
-  AND c.CustomerID IN (
-      SELECT ah.CustomerID
-      FROM ACCOUNT_HOLDER ah
-      JOIN ACCOUNT a ON ah.AccountID = a.AccountID
-      WHERE a.AccountType = 'Saving' AND a.Status = 'Active'
-  );
+WHERE c.CustomerID IN (
+    SELECT ah.CustomerID
+    FROM ACCOUNT_HOLDER ah
+    JOIN ACCOUNT a ON ah.AccountID = a.AccountID
+    WHERE a.AccountType = 'Saving'
+);
 
--- --------------------------------------------------------------------
--- PROBLEM 5: High-Value Financial Transactions Audit
--- Business Question:
--- "List all transactions exceeding ₹20,000 for AML (Anti-Money Laundering)
---  compliance audit, including sender details and branch."
--- Concepts: JOIN, WHERE filter, Date formatting, Sorting
--- --------------------------------------------------------------------
+-- -------------------------------------------------------------
+-- Query 5: Find all high value transactions (amount >= 20,000) for audit
+-- Concepts used: Multi-table JOIN, WHERE clause filter, ORDER BY
+-- -------------------------------------------------------------
 SELECT 
     t.TransactionID,
     t.ReferenceNumber,
@@ -126,118 +91,79 @@ SELECT
     t.TransactionType,
     t.Amount,
     a.AccountNumber,
-    CONCAT(c.FirstName, ' ', c.LastName) AS CustomerName,
-    b.BranchName,
-    t.Description
+    CONCAT(c.FirstName, ' ', c.LastName) AS CustomerName
 FROM TRANSACTION t
 JOIN ACCOUNT a ON t.AccountID = a.AccountID
-JOIN BRANCH b ON a.BranchID = b.BranchID
-JOIN ACCOUNT_HOLDER ah ON a.AccountID = ah.AccountID AND ah.HolderType = 'Primary'
+JOIN ACCOUNT_HOLDER ah ON a.AccountID = ah.AccountID
 JOIN CUSTOMER c ON ah.CustomerID = c.CustomerID
-WHERE t.Amount >= 20000.00
+WHERE t.Amount >= 20000
 ORDER BY t.Amount DESC;
 
--- --------------------------------------------------------------------
--- PROBLEM 6: Branch Staffing vs Business Volume Analysis
--- Business Question:
--- "Calculate the average salary paid per branch, total staff count, and
---  deposit volume managed per employee."
--- Concepts: Aggregation, Mathematical Computed Columns, GROUP BY
--- --------------------------------------------------------------------
+-- -------------------------------------------------------------
+-- Query 6: Find total employees and average employee salary per branch
+-- Concepts used: GROUP BY, COUNT, AVG, ROUND
+-- -------------------------------------------------------------
 SELECT 
-    b.BranchID,
     b.BranchName,
-    COUNT(DISTINCT e.EmployeeID) AS TotalStaff,
-    ROUND(AVG(e.Salary), 2) AS AverageStaffSalary,
-    COALESCE(SUM(DISTINCT a.Balance), 0.00) AS TotalBranchDeposits,
-    ROUND(
-        COALESCE(SUM(DISTINCT a.Balance), 0.00) / NULLIF(COUNT(DISTINCT e.EmployeeID), 0), 
-        2
-    ) AS DepositVolumePerEmployee
+    COUNT(e.EmployeeID) AS TotalEmployees,
+    ROUND(AVG(e.Salary), 2) AS AverageSalary
 FROM BRANCH b
 LEFT JOIN EMPLOYEE e ON b.BranchID = e.BranchID
-LEFT JOIN ACCOUNT a ON b.BranchID = a.BranchID AND a.Status = 'Active'
-GROUP BY b.BranchID, b.BranchName
-ORDER BY TotalBranchDeposits DESC;
+GROUP BY b.BranchID, b.BranchName;
 
--- --------------------------------------------------------------------
--- PROBLEM 7: Loan Repayment Performance & Outstanding Recovery
--- Business Question:
--- "Determine the outstanding balance on all active loans by subtracting
---  total repayments made to date from the original loan amount."
--- Concepts: LEFT JOIN, Aggregation, COALESCE, Subtraction
--- --------------------------------------------------------------------
+-- -------------------------------------------------------------
+-- Query 7: Track loan repayments and find remaining loan balance
+-- Concepts used: LEFT JOIN, Aggregation SUM, Subtraction, COALESCE
+-- -------------------------------------------------------------
 SELECT 
     l.LoanID,
-    CONCAT(c.FirstName, ' ', c.LastName) AS BorrowerName,
-    c.Mobile,
+    CONCAT(c.FirstName, ' ', c.LastName) AS Borrower,
     l.LoanType,
     l.LoanAmount AS PrincipalAmount,
-    l.InterestRate,
-    COALESCE(SUM(lp.Amount), 0.00) AS TotalAmountRepaid,
-    (l.LoanAmount - COALESCE(SUM(lp.Amount), 0.00)) AS OutstandingPrincipal,
-    ROUND((COALESCE(SUM(lp.Amount), 0.00) / l.LoanAmount) * 100, 2) AS RepaymentPercentage,
+    COALESCE(SUM(lp.Amount), 0) AS TotalPaid,
+    (l.LoanAmount - COALESCE(SUM(lp.Amount), 0)) AS RemainingAmount,
     l.LoanStatus
 FROM LOAN l
 JOIN CUSTOMER c ON l.CustomerID = c.CustomerID
 LEFT JOIN LOAN_PAYMENT lp ON l.LoanID = lp.LoanID
-GROUP BY l.LoanID, c.FirstName, c.LastName, c.Mobile, l.LoanType, l.LoanAmount, l.InterestRate, l.LoanStatus
-ORDER BY OutstandingPrincipal DESC;
+GROUP BY l.LoanID, c.FirstName, c.LastName, l.LoanType, l.LoanAmount, l.LoanStatus;
 
--- --------------------------------------------------------------------
--- PROBLEM 8: Customers with Multiple Bank Accounts (Cross-Selling)
--- Business Question:
--- "Identify customers holding more than 1 bank account, their total balance,
---  and the distinct account types they hold."
--- Concepts: GROUP BY, HAVING COUNT() > 1, GROUP_CONCAT
--- --------------------------------------------------------------------
+-- -------------------------------------------------------------
+-- Query 8: Find customers who hold more than one bank account
+-- Concepts used: GROUP BY, HAVING COUNT > 1
+-- -------------------------------------------------------------
 SELECT 
     c.CustomerID,
     CONCAT(c.FirstName, ' ', c.LastName) AS CustomerName,
-    c.Mobile,
-    COUNT(a.AccountID) AS TotalAccounts,
-    GROUP_CONCAT(DISTINCT a.AccountType SEPARATOR ', ') AS AccountTypesHeld,
-    SUM(a.Balance) AS TotalCombinedBalance
+    COUNT(ah.AccountID) AS TotalAccounts,
+    SUM(a.Balance) AS CombinedBalance
 FROM CUSTOMER c
 JOIN ACCOUNT_HOLDER ah ON c.CustomerID = ah.CustomerID
 JOIN ACCOUNT a ON ah.AccountID = a.AccountID
-GROUP BY c.CustomerID, c.FirstName, c.LastName, c.Mobile
-HAVING COUNT(a.AccountID) > 1
-ORDER BY TotalAccounts DESC;
+GROUP BY c.CustomerID, c.FirstName, c.LastName
+HAVING COUNT(ah.AccountID) > 1;
 
--- --------------------------------------------------------------------
--- PROBLEM 9: Monthly Transaction Volume and Inflow vs Outflow
--- Business Question:
--- "Summarize total cash inflows (DEPOSIT + TRANSFER_IN) and outflows
---  (WITHDRAWAL + TRANSFER_OUT) grouped by transaction type."
--- Concepts: GROUP BY, SUM(), COUNT(), Percentage Distribution
--- --------------------------------------------------------------------
+-- -------------------------------------------------------------
+-- Query 9: Calculate total transactions and sum of money by transaction type
+-- Concepts used: GROUP BY TransactionType, COUNT, SUM, AVG
+-- -------------------------------------------------------------
 SELECT 
-    t.TransactionType,
-    COUNT(t.TransactionID) AS TotalTransactions,
-    SUM(t.Amount) AS TotalTurnover,
-    ROUND(AVG(t.Amount), 2) AS AverageTransactionSize,
-    CASE 
-        WHEN t.TransactionType IN ('DEPOSIT', 'TRANSFER_IN') THEN 'NET INFLOW (Liquidity Boost)'
-        ELSE 'NET OUTFLOW (Fund Drain)'
-    END AS CashFlowImpact
-FROM TRANSACTION t
-WHERE t.TransactionStatus = 'SUCCESS'
-GROUP BY t.TransactionType
-ORDER BY TotalTurnover DESC;
+    TransactionType,
+    COUNT(*) AS TotalCount,
+    SUM(Amount) AS TotalAmount,
+    ROUND(AVG(Amount), 2) AS AverageAmount
+FROM TRANSACTION
+GROUP BY TransactionType
+ORDER BY TotalAmount DESC;
 
--- --------------------------------------------------------------------
--- PROBLEM 10: City-wise Customer Demographics & Financial Penetration
--- Business Question:
--- "Analyze customer penetration by city: total registered customers,
---  average age, and cumulative wealth parked in the bank."
--- Concepts: TIMESTAMPDIFF with CURDATE, GROUP BY, Aggregation
--- --------------------------------------------------------------------
+-- -------------------------------------------------------------
+-- Query 10: Find total customers and deposits grouped by city
+-- Concepts used: GROUP BY City, COUNT DISTINCT, SUM
+-- -------------------------------------------------------------
 SELECT 
     c.City,
-    COUNT(DISTINCT c.CustomerID) AS TotalCustomers,
-    ROUND(AVG(TIMESTAMPDIFF(YEAR, c.DateOfBirth, CURDATE())), 1) AS AverageCustomerAge,
-    COALESCE(SUM(a.Balance), 0.00) AS TotalCityDeposits
+    COUNT(DISTINCT c.CustomerID) AS CustomerCount,
+    COALESCE(SUM(a.Balance), 0) AS TotalCityDeposits
 FROM CUSTOMER c
 LEFT JOIN ACCOUNT_HOLDER ah ON c.CustomerID = ah.CustomerID
 LEFT JOIN ACCOUNT a ON ah.AccountID = a.AccountID
