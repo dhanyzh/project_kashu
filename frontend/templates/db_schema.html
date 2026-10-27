@@ -1,0 +1,208 @@
+{% extends "base.html" %}
+
+{% block title %}Database Schema & Architecture - Project Kashi{% endblock %}
+
+{% block content %}
+<div class="page-header">
+    <div class="page-title-group">
+        <h2>Database Architecture & Schema Inspector</h2>
+        <p>Comprehensive inspection of relational tables, foreign keys, constraints, triggers, and ER model.</p>
+    </div>
+    <div class="header-actions">
+        <span class="badge badge-primary-holder" style="padding: 0.5rem 1rem; font-size: 0.85rem;">
+            Database: project_kashi (InnoDB)
+        </span>
+    </div>
+</div>
+
+<!-- ER Diagram Mermaid Card -->
+<div class="card" style="margin-bottom: 2rem;">
+    <div class="card-header">
+        <div class="card-title">
+            <span>🗺️</span> Entity-Relationship (ER) Diagram
+        </div>
+        <span class="badge badge-active">Relational Mapping</span>
+    </div>
+    <div class="card-body" style="background: #ffffff; text-align: center; overflow-x: auto; padding: 2rem;">
+        <pre class="mermaid">
+erDiagram
+    BRANCH ||--o{ EMPLOYEE : "employs"
+    BRANCH ||--o{ ACCOUNT : "maintains"
+    BRANCH ||--o{ LOAN : "sanctions"
+    CUSTOMER ||--o{ ACCOUNT_HOLDER : "holds"
+    ACCOUNT ||--o{ ACCOUNT_HOLDER : "belongs_to"
+    ACCOUNT ||--o{ TRANSACTION : "records"
+    CUSTOMER ||--o{ LOAN : "borrows"
+    LOAN ||--o{ LOAN_PAYMENT : "repaid_via"
+
+    BRANCH {
+        int BranchID PK
+        string BranchName
+        string IFSCCode UK
+        string City
+    }
+    CUSTOMER {
+        int CustomerID PK
+        string FirstName
+        string LastName
+        string Mobile UK
+        string Email UK
+    }
+    EMPLOYEE {
+        int EmployeeID PK
+        string EmployeeName
+        string Designation
+        decimal Salary
+        int BranchID FK
+    }
+    ACCOUNT {
+        int AccountID PK
+        string AccountNumber UK
+        string AccountType
+        decimal Balance
+        string Status
+        int BranchID FK
+    }
+    ACCOUNT_HOLDER {
+        int CustomerID PK,FK
+        int AccountID PK,FK
+        date HolderSince
+        string HolderType
+    }
+    TRANSACTION {
+        int TransactionID PK
+        int AccountID FK
+        string TransactionType
+        decimal Amount
+        string ReferenceNumber UK
+    }
+    LOAN {
+        int LoanID PK
+        int CustomerID FK
+        int BranchID FK
+        string LoanType
+        decimal LoanAmount
+        decimal InterestRate
+    }
+    LOAN_PAYMENT {
+        int PaymentID PK
+        int LoanID FK
+        decimal Amount
+        string PaymentMode
+        string ReferenceNumber UK
+    }
+        </pre>
+    </div>
+</div>
+
+<!-- Database Tables Inspector -->
+<h3 style="font-size: 1.25rem; font-weight: 800; color: var(--primary); margin-bottom: 1rem;">
+    Relational Tables & Attributes
+</h3>
+
+<div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(420px, 1fr)); gap: 1.5rem; margin-bottom: 2rem;">
+    {% for tbl_name, data in table_details.items() %}
+    <div class="card" style="margin-bottom: 0;">
+        <div class="card-header">
+            <div class="card-title" style="font-size: 1rem;">
+                <span>📋</span> Table: <code>{{ tbl_name }}</code>
+            </div>
+            <span class="badge badge-active">{{ data.count }} Rows</span>
+        </div>
+        <div class="table-responsive">
+            <table>
+                <thead>
+                    <tr>
+                        <th>Field</th>
+                        <th>Type</th>
+                        <th>Null</th>
+                        <th>Key</th>
+                        <th>Default</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for col in data.columns %}
+                    <tr>
+                        <td class="mono"><strong>{{ col.Field }}</strong></td>
+                        <td class="mono" style="font-size: 0.75rem; color: var(--brand-blue);">{{ col.Type }}</td>
+                        <td>{{ col.Null }}</td>
+                        <td>
+                            {% if col.Key == 'PRI' %}
+                                <span class="badge" style="background: #fef3c7; color: #92400e;">PK</span>
+                            {% elif col.Key == 'UNI' %}
+                                <span class="badge" style="background: #e0e7ff; color: #3730a3;">UK</span>
+                            {% elif col.Key == 'MUL' %}
+                                <span class="badge" style="background: #f1f5f9; color: var(--text-secondary);">FK</span>
+                            {% else %}
+                                -
+                            {% endif %}
+                        </td>
+                        <td class="mono" style="font-size: 0.75rem;">{{ col.Default if col.Default is not none else 'NULL' }}</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+    {% endfor %}
+</div>
+
+<!-- Triggers & Routines Section -->
+<div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem;">
+    <!-- Stored Procedures & Functions -->
+    <div class="card">
+        <div class="card-header">
+            <div class="card-title">
+                <span>⚙️</span> Stored Procedures & Functions
+            </div>
+            <span class="badge badge-primary-holder">MySQL Routines</span>
+        </div>
+        <div class="card-body">
+            <div style="margin-bottom: 1.25rem;">
+                <h4 style="font-size: 0.95rem; color: var(--primary); margin-bottom: 0.5rem;">Stored Procedures:</h4>
+                <ul style="padding-left: 1.25rem; font-size: 0.875rem; color: var(--text-secondary); line-height: 1.8;">
+                    <li><code>sp_transfer_funds(...)</code> — Atomic fund transfer with ACID controls</li>
+                    <li><code>sp_deposit_money(...)</code> — Safe credit transaction with state checking</li>
+                    <li><code>sp_withdraw_money(...)</code> — Debit transaction with balance validation</li>
+                </ul>
+            </div>
+
+            <div>
+                <h4 style="font-size: 0.95rem; color: var(--primary); margin-bottom: 0.5rem;">Stored Functions:</h4>
+                <ul style="padding-left: 1.25rem; font-size: 0.875rem; color: var(--text-secondary); line-height: 1.8;">
+                    <li><code>fn_customer_total_balance(cust_id)</code> — Returns consolidated customer balance</li>
+                    <li><code>fn_calculate_emi(amount, rate, tenure)</code> — Mathematical installment formula</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+
+    <!-- Triggers & Views -->
+    <div class="card">
+        <div class="card-header">
+            <div class="card-title">
+                <span>⚡</span> Database Triggers & Views
+            </div>
+            <span class="badge badge-active">Active Rules</span>
+        </div>
+        <div class="card-body">
+            <div style="margin-bottom: 1.25rem;">
+                <h4 style="font-size: 0.95rem; color: var(--primary); margin-bottom: 0.5rem;">Triggers:</h4>
+                <ul style="padding-left: 1.25rem; font-size: 0.875rem; color: var(--text-secondary); line-height: 1.8;">
+                    <li><code>trg_prevent_negative_balance</code> (BEFORE UPDATE ON ACCOUNT) — Raises SQLSTATE 45000 if balance drops below ₹0.00</li>
+                    <li><code>trg_check_loan_completion</code> (AFTER INSERT ON LOAN_PAYMENT) — Auto-closes loan when total repaid &ge; principal</li>
+                </ul>
+            </div>
+
+            <div>
+                <h4 style="font-size: 0.95rem; color: var(--primary); margin-bottom: 0.5rem;">Virtual Tables (Views):</h4>
+                <ul style="padding-left: 1.25rem; font-size: 0.875rem; color: var(--text-secondary); line-height: 1.8;">
+                    <li><code>vw_customer_accounts</code> — Full customer accounts mapping with branch IFSC</li>
+                    <li><code>vw_passbook</code> — Formatted multi-table financial transaction ledger</li>
+                    <li><code>vw_branch_summary</code> — Branch-wise liquidity & asset exposure metrics</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

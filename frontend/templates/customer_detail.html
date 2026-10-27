@@ -1,0 +1,130 @@
+{% extends "base.html" %}
+
+{% block title %}Customer Profile - {{ customer.FirstName }} {{ customer.LastName }}{% endblock %}
+
+{% block content %}
+<div class="page-header">
+    <div class="page-title-group">
+        <h2>Customer Profile: {{ customer.FirstName }} {{ customer.LastName }}</h2>
+        <p>Customer ID: #{{ customer.CustomerID }} | Registered: {{ customer.RegistrationDate.strftime('%d %B %Y') if customer.RegistrationDate else '-' }}</p>
+    </div>
+    <div class="header-actions">
+        <a href="{{ url_for('customers_list') }}" class="btn btn-outline">&larr; Back to Directory</a>
+        <a href="{{ url_for('accounts_list') }}" class="btn btn-primary">+ Open New Account</a>
+    </div>
+</div>
+
+<!-- Profile Info Card -->
+<div style="display: grid; grid-template-columns: 1fr 2fr; gap: 1.5rem; margin-bottom: 2rem;">
+    <!-- Personal Details Card -->
+    <div class="card">
+        <div class="card-header">
+            <div class="card-title">
+                <span>👤</span> Personal Details
+            </div>
+        </div>
+        <div class="card-body">
+            <p style="margin-bottom: 0.75rem;"><strong>Full Name:</strong> {{ customer.FirstName }} {{ customer.LastName }}</p>
+            <p style="margin-bottom: 0.75rem;"><strong>Gender:</strong> {{ customer.Gender }}</p>
+            <p style="margin-bottom: 0.75rem;"><strong>Date of Birth:</strong> {{ customer.DateOfBirth.strftime('%d-%b-%Y') if customer.DateOfBirth else '-' }}</p>
+            <p style="margin-bottom: 0.75rem;"><strong>Mobile:</strong> {{ customer.Mobile }}</p>
+            <p style="margin-bottom: 0.75rem;"><strong>Email:</strong> {{ customer.Email }}</p>
+            <p style="margin-bottom: 0.75rem;"><strong>City:</strong> {{ customer.City }}</p>
+            <p style="margin-bottom: 0.75rem;"><strong>Address:</strong> {{ customer.Address }}</p>
+        </div>
+    </div>
+
+    <!-- Aggregate Wealth Card (Function fn_customer_total_balance demonstration) -->
+    <div class="card">
+        <div class="card-header">
+            <div class="card-title">
+                <span>💳</span> Financial Position
+            </div>
+            <span class="badge badge-primary-holder">fn_customer_total_balance()</span>
+        </div>
+        <div class="card-body">
+            <div class="kpi-card green" style="border: none; box-shadow: none; padding: 0.5rem 0; margin-bottom: 1.5rem;">
+                <div class="kpi-title">Total Active Liquid Balance</div>
+                <div class="kpi-value" style="font-size: 2.25rem;">₹{{ "{:,.2f}".format(total_balance) }}</div>
+                <div class="kpi-sub">Computed live using MySQL stored function: <code>fn_customer_total_balance({{ customer.CustomerID }})</code></div>
+            </div>
+
+            <h4 style="font-size: 1rem; margin-bottom: 0.75rem; color: var(--primary);">Owned Bank Accounts ({{ accounts|length }})</h4>
+            <div class="table-responsive">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Account No</th>
+                            <th>Type</th>
+                            <th>Branch</th>
+                            <th>Holder Role</th>
+                            <th>Balance</th>
+                            <th>Status</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for a in accounts %}
+                        <tr>
+                            <td class="mono"><strong>{{ a.AccountNumber }}</strong></td>
+                            <td>{{ a.AccountType }}</td>
+                            <td>{{ a.BranchName }} ({{ a.IFSCCode }})</td>
+                            <td><span class="badge badge-primary-holder">{{ a.HolderType }}</span></td>
+                            <td style="font-weight: 700;">₹{{ "{:,.2f}".format(a.Balance) }}</td>
+                            <td><span class="badge badge-active">{{ a.Status }}</span></td>
+                        </tr>
+                        {% else %}
+                        <tr>
+                            <td colspan="6" style="text-align: center; color: var(--text-muted); padding: 1.5rem;">No accounts currently linked.</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Linked Loans Section -->
+<div class="card">
+    <div class="card-header">
+        <div class="card-title">
+            <span>📑</span> Active Loans & Lending Obligations ({{ loans|length }})
+        </div>
+        <a href="{{ url_for('loans_list') }}" class="btn btn-outline btn-sm">Go to Loan Desk</a>
+    </div>
+    <div class="table-responsive">
+        <table>
+            <thead>
+                <tr>
+                    <th>Loan ID</th>
+                    <th>Loan Type</th>
+                    <th>Sanctioned Amount</th>
+                    <th>Interest Rate</th>
+                    <th>Tenure</th>
+                    <th>Calculated Monthly EMI</th>
+                    <th>Total Repaid</th>
+                    <th>Status</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for l in loans %}
+                <tr>
+                    <td class="mono">#LN-{{ l.LoanID }}</td>
+                    <td><strong>{{ l.LoanType }}</strong></td>
+                    <td>₹{{ "{:,.2f}".format(l.LoanAmount) }}</td>
+                    <td>{{ l.InterestRate }}% p.a.</td>
+                    <td>{{ l.TenureMonths }} Months</td>
+                    <td style="font-weight: 700; color: var(--brand-blue);">₹{{ "{:,.2f}".format(l.MonthlyEMI or 0) }}</td>
+                    <td style="color: var(--success); font-weight: 600;">₹{{ "{:,.2f}".format(l.TotalPaid or 0) }}</td>
+                    <td><span class="badge badge-active">{{ l.LoanStatus }}</span></td>
+                </tr>
+                {% else %}
+                <tr>
+                    <td colspan="8" style="text-align: center; color: var(--text-muted); padding: 2rem;">Customer has no active loans.</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+{% endblock %}

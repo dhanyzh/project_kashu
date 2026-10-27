@@ -1,0 +1,142 @@
+{% extends "base.html" %}
+
+{% block title %}Dashboard - Project Kashi Banking System{% endblock %}
+
+{% block content %}
+<div class="page-header">
+    <div class="page-title-group">
+        <h2>Executive Banking Overview</h2>
+        <p>Real-time bank metrics, aggregate liquidity, and operations log.</p>
+    </div>
+    <div class="header-actions">
+        <a href="{{ url_for('transactions_list') }}" class="btn btn-primary">⚡ Quick Transfer</a>
+        <a href="{{ url_for('accounts_list') }}" class="btn btn-outline">+ Open Account</a>
+    </div>
+</div>
+
+<!-- KPI Metrics Grid -->
+<div class="kpi-grid">
+    <div class="kpi-card green">
+        <div class="kpi-header">
+            <span class="kpi-title">Total Deposits</span>
+            <div class="kpi-icon">💰</div>
+        </div>
+        <div class="kpi-value">₹{{ "{:,.2f}".format(stats.total_deposits or 0) }}</div>
+        <div class="kpi-sub">Across {{ stats.total_accounts }} active accounts</div>
+    </div>
+
+    <div class="kpi-card gold">
+        <div class="kpi-header">
+            <span class="kpi-title">Disbursed Loans</span>
+            <div class="kpi-icon">📑</div>
+        </div>
+        <div class="kpi-value">₹{{ "{:,.2f}".format(stats.total_loan_amount or 0) }}</div>
+        <div class="kpi-sub">{{ stats.active_loans }} active lending contracts</div>
+    </div>
+
+    <div class="kpi-card">
+        <div class="kpi-header">
+            <span class="kpi-title">Customers</span>
+            <div class="kpi-icon">👥</div>
+        </div>
+        <div class="kpi-value">{{ stats.total_customers }}</div>
+        <div class="kpi-sub">Verified KYC account holders</div>
+    </div>
+
+    <div class="kpi-card purple">
+        <div class="kpi-header">
+            <span class="kpi-title">Branches</span>
+            <div class="kpi-icon">🏢</div>
+        </div>
+        <div class="kpi-value">{{ stats.total_branches }}</div>
+        <div class="kpi-sub">Across Uttar Pradesh</div>
+    </div>
+</div>
+
+<!-- Recent Transactions & Branch Summaries -->
+<div style="display: grid; grid-template-columns: 2fr 1.2fr; gap: 1.5rem; align-items: start;">
+    <!-- Recent Transactions Card -->
+    <div class="card">
+        <div class="card-header">
+            <div class="card-title">
+                <span>⏱️</span> Recent Financial Transactions
+            </div>
+            <a href="{{ url_for('transactions_list') }}" class="btn btn-outline btn-sm">View All Passbook</a>
+        </div>
+        <div class="table-responsive">
+            <table>
+                <thead>
+                    <tr>
+                        <th>Date & Time</th>
+                        <th>Ref Number</th>
+                        <th>Account</th>
+                        <th>Type</th>
+                        <th>Amount</th>
+                        <th>Status</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for txn in recent_transactions %}
+                    <tr>
+                        <td>{{ txn.TransactionDate.strftime('%d-%b-%Y %H:%M') if txn.TransactionDate else '-' }}</td>
+                        <td class="mono">{{ txn.ReferenceNumber }}</td>
+                        <td>
+                            <strong>{{ txn.AccountNumber }}</strong><br>
+                            <small class="text-muted">{{ txn.AccountHolder }}</small>
+                        </td>
+                        <td>
+                            <span class="badge badge-{{ txn.TransactionType|lower }}">
+                                {{ txn.TransactionType }}
+                            </span>
+                        </td>
+                        <td style="font-weight: 700; color: {% if txn.TransactionType in ['DEPOSIT', 'TRANSFER_IN'] %}var(--success){% else %}var(--danger){% endif %};">
+                            {% if txn.TransactionType in ['DEPOSIT', 'TRANSFER_IN'] %}+{% else %}-{% endif %}₹{{ "{:,.2f}".format(txn.Amount) }}
+                        </td>
+                        <td>
+                            <span class="badge badge-active">{{ txn.TransactionStatus }}</span>
+                        </td>
+                    </tr>
+                    {% else %}
+                    <tr>
+                        <td colspan="6" style="text-align: center; color: var(--text-muted); padding: 2rem;">No transactions recorded yet.</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <!-- Branch Liquidity Card (from View vw_branch_summary) -->
+    <div class="card">
+        <div class="card-header">
+            <div class="card-title">
+                <span>🏦</span> Branch Liquidity
+            </div>
+            <span class="badge badge-primary-holder">vw_branch_summary</span>
+        </div>
+        <div class="table-responsive">
+            <table>
+                <thead>
+                    <tr>
+                        <th>Branch</th>
+                        <th>Accounts</th>
+                        <th>Total Deposits</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for b in branch_summaries %}
+                    <tr>
+                        <td>
+                            <strong>{{ b.BranchName }}</strong><br>
+                            <small class="mono text-muted">{{ b.IFSCCode }}</small>
+                        </td>
+                        <td>{{ b.TotalAccounts }}</td>
+                        <td style="font-weight: 700;">₹{{ "{:,.2f}".format(b.TotalDeposits) }}</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+{% endblock %}

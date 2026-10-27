@@ -1,0 +1,282 @@
+{% extends "base.html" %}
+
+{% block title %}Loan Management - Project Kashi Banking System{% endblock %}
+
+{% block content %}
+<div class="page-header">
+    <div class="page-title-group">
+        <h2>Credit & Lending Services</h2>
+        <p>Manage loan applications, interest schedules, EMI calculation, and repayment tracking.</p>
+    </div>
+    <div class="header-actions">
+        <button type="button" class="btn btn-outline" data-modal-target="pay-loan-modal">
+            💳 Record Loan Payment
+        </button>
+        <button type="button" class="btn btn-primary" data-modal-target="apply-loan-modal">
+            + Sanction New Loan
+        </button>
+    </div>
+</div>
+
+<!-- Live EMI Estimator Card -->
+<div class="card" style="margin-bottom: 2rem; background: linear-gradient(135deg, #f8fafc 0%, #eff6ff 100%);">
+    <div class="card-header" style="background: transparent;">
+        <div class="card-title">
+            <span>🧮</span> Interactive Loan EMI Calculator
+        </div>
+        <span class="badge badge-primary-holder">MySQL Function fn_calculate_emi</span>
+    </div>
+    <div class="card-body">
+        <div class="form-grid" style="align-items: center;">
+            <div class="form-group">
+                <label>Principal Amount (₹)</label>
+                <input type="number" id="calc-loan-amount" value="500000" step="10000">
+            </div>
+            <div class="form-group">
+                <label>Annual Interest Rate (%)</label>
+                <input type="number" id="calc-interest-rate" value="8.5" step="0.1">
+            </div>
+            <div class="form-group">
+                <label>Tenure (Months)</label>
+                <input type="number" id="calc-tenure-months" value="36" step="6">
+            </div>
+            <div class="form-group" style="text-align: center; background: #ffffff; padding: 0.75rem; border-radius: var(--radius-md); border: 1px solid var(--border-color);">
+                <label style="color: var(--text-secondary);">Estimated Monthly Installment</label>
+                <div id="calc-emi-result" style="font-size: 1.5rem; font-weight: 800; color: var(--brand-blue);">
+                    ₹15,783.77 / mo
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Active Loans Portfolio -->
+<div class="card">
+    <div class="card-header">
+        <div class="card-title">
+            <span>📑</span> Sanctioned Loan Contracts ({{ loans|length }} Records)
+        </div>
+        <div style="font-size: 0.85rem; color: var(--text-muted);">
+            Table 7: <code>LOAN</code> & Table 8: <code>LOAN_PAYMENT</code>
+        </div>
+    </div>
+    <div class="table-responsive">
+        <table>
+            <thead>
+                <tr>
+                    <th>Loan ID</th>
+                    <th>Borrower</th>
+                    <th>Branch</th>
+                    <th>Loan Category</th>
+                    <th>Principal</th>
+                    <th>Rate & Tenure</th>
+                    <th>Monthly EMI</th>
+                    <th>Total Repaid</th>
+                    <th>Outstanding</th>
+                    <th>Status</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for l in loans %}
+                <tr>
+                    <td class="mono"><strong>#LN-{{ l.LoanID }}</strong></td>
+                    <td>
+                        <strong>{{ l.CustomerName }}</strong><br>
+                        <small class="text-muted">📞 {{ l.Mobile }}</small>
+                    </td>
+                    <td>{{ l.BranchName }}</td>
+                    <td>
+                        <span class="badge" style="background: #eef2ff; color: #4338ca;">{{ l.LoanType }}</span>
+                    </td>
+                    <td style="font-weight: 700;">₹{{ "{:,.2f}".format(l.LoanAmount) }}</td>
+                    <td>
+                        {{ l.InterestRate }}% p.a.<br>
+                        <small class="text-muted">{{ l.TenureMonths }} Months</small>
+                    </td>
+                    <td style="font-weight: 800; color: var(--brand-blue);">
+                        ₹{{ "{:,.2f}".format(l.MonthlyEMI or 0) }}
+                    </td>
+                    <td style="color: var(--success); font-weight: 700;">
+                        ₹{{ "{:,.2f}".format(l.TotalPaid or 0) }}
+                    </td>
+                    <td style="color: var(--danger); font-weight: 700;">
+                        ₹{{ "{:,.2f}".format(l.OutstandingAmount) }}
+                    </td>
+                    <td>
+                        <span class="badge {% if l.LoanStatus == 'Closed' %}badge-closed{% else %}badge-active{% endif %}">
+                            {{ l.LoanStatus }}
+                        </span>
+                    </td>
+                </tr>
+                {% else %}
+                <tr>
+                    <td colspan="10" style="text-align: center; color: var(--text-muted); padding: 2.5rem;">No loans sanctioned yet.</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+
+<!-- Recent Loan Repayments Table -->
+<div class="card" style="margin-top: 2rem;">
+    <div class="card-header">
+        <div class="card-title">
+            <span>💸</span> Recent Loan Repayments History
+        </div>
+        <span class="badge badge-primary-holder">Table: LOAN_PAYMENT</span>
+    </div>
+    <div class="table-responsive">
+        <table>
+            <thead>
+                <tr>
+                    <th>Payment ID</th>
+                    <th>Payment Date</th>
+                    <th>Loan Ref</th>
+                    <th>Borrower</th>
+                    <th>Loan Type</th>
+                    <th>Repayment Mode</th>
+                    <th>Amount Paid</th>
+                    <th>Transaction Ref</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for p in recent_payments %}
+                <tr>
+                    <td class="mono">#PAY-{{ p.PaymentID }}</td>
+                    <td>{{ p.PaymentDate.strftime('%d-%b-%Y %H:%M') if p.PaymentDate else '-' }}</td>
+                    <td class="mono">#LN-{{ p.LoanID }}</td>
+                    <td><strong>{{ p.CustomerName }}</strong></td>
+                    <td>{{ p.LoanType }}</td>
+                    <td><span class="badge badge-active">{{ p.PaymentMode }}</span></td>
+                    <td style="font-weight: 700; color: var(--success);">₹{{ "{:,.2f}".format(p.Amount) }}</td>
+                    <td class="mono text-muted">{{ p.ReferenceNumber }}</td>
+                </tr>
+                {% else %}
+                <tr>
+                    <td colspan="8" style="text-align: center; color: var(--text-muted); padding: 2rem;">No loan repayments recorded yet.</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+
+<!-- Modal: Sanction New Loan -->
+<div id="apply-loan-modal" class="modal">
+    <div class="modal-content">
+        <div class="modal-header">
+            <h3>Sanction New Bank Loan</h3>
+            <button type="button" class="modal-close" data-modal-close>&times;</button>
+        </div>
+        <form method="POST" action="{{ url_for('loan_apply') }}">
+            <div class="modal-body">
+                <div class="form-grid">
+                    <div class="form-group full-width">
+                        <label>Borrower (Customer) <span class="req">*</span></label>
+                        <select name="customer_id" required>
+                            <option value="">-- Select Customer --</option>
+                            {% for c in customers %}
+                            <option value="{{ c.CustomerID }}">{{ c.FullName }} (ID: {{ c.CustomerID }})</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+
+                    <div class="form-group">
+                        <label>Sanctioning Branch <span class="req">*</span></label>
+                        <select name="branch_id" required>
+                            <option value="">-- Select Branch --</option>
+                            {% for b in branches %}
+                            <option value="{{ b.BranchID }}">{{ b.BranchName }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+
+                    <div class="form-group">
+                        <label>Loan Category <span class="req">*</span></label>
+                        <select name="loan_type" required>
+                            <option value="Home Loan">Home Loan (7.25%)</option>
+                            <option value="Education Loan">Education Loan (6.75%)</option>
+                            <option value="Vehicle Loan">Vehicle Loan (8.50%)</option>
+                            <option value="Personal Loan">Personal Loan (11.50%)</option>
+                        </select>
+                    </div>
+
+                    <div class="form-group">
+                        <label>Sanction Amount (₹) <span class="req">*</span></label>
+                        <input type="number" step="1000" min="5000" name="loan_amount" required placeholder="e.g. 500000">
+                    </div>
+
+                    <div class="form-group">
+                        <label>Annual Interest Rate (%) <span class="req">*</span></label>
+                        <input type="number" step="0.05" min="1" max="30" name="interest_rate" value="8.50" required>
+                    </div>
+
+                    <div class="form-group">
+                        <label>Tenure in Months <span class="req">*</span></label>
+                        <input type="number" min="6" max="360" name="tenure_months" value="36" required>
+                    </div>
+
+                    <div class="form-group">
+                        <label>Sanction Date <span class="req">*</span></label>
+                        <input type="date" name="start_date" required>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-header" style="border-top: 1px solid var(--border-color); border-bottom: none; justify-content: flex-end; gap: 0.5rem;">
+                <button type="button" class="btn btn-outline" data-modal-close>Cancel</button>
+                <button type="submit" class="btn btn-primary">Sanction & Disburse</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- Modal: Record Loan Payment -->
+<div id="pay-loan-modal" class="modal">
+    <div class="modal-content">
+        <div class="modal-header">
+            <h3>Record Loan Repayment (EMI)</h3>
+            <button type="button" class="modal-close" data-modal-close>&times;</button>
+        </div>
+        <form method="POST" action="{{ url_for('loan_payment') }}">
+            <div class="modal-body">
+                <div class="form-grid">
+                    <div class="form-group full-width">
+                        <label>Select Loan Account <span class="req">*</span></label>
+                        <select name="loan_id" required>
+                            <option value="">-- Choose Loan Contract --</option>
+                            {% for l in loans %}
+                            <option value="{{ l.LoanID }}">
+                                #LN-{{ l.LoanID }} — {{ l.CustomerName }} ({{ l.LoanType }} | Outstanding: ₹{{ "{:,.2f}".format(l.OutstandingAmount) }})
+                            </option>
+                            {% endfor %}
+                        </select>
+                    </div>
+
+                    <div class="form-group">
+                        <label>Installment Amount (₹) <span class="req">*</span></label>
+                        <input type="number" step="0.01" min="1" name="amount" required placeholder="Repayment amount">
+                    </div>
+
+                    <div class="form-group">
+                        <label>Payment Channel <span class="req">*</span></label>
+                        <select name="payment_mode" required>
+                            <option value="NetBanking">NetBanking / ECS</option>
+                            <option value="UPI">UPI AutoPay</option>
+                            <option value="Cash">Cash at Branch</option>
+                            <option value="Cheque">Banker Cheque</option>
+                        </select>
+                    </div>
+                </div>
+                <small class="text-muted">
+                    ⚡ <strong>Database Trigger:</strong> When total repayments cover the principal amount, trigger <code>trg_check_loan_completion</code> will automatically mark the loan status as <code>Closed</code>!
+                </small>
+            </div>
+            <div class="modal-header" style="border-top: 1px solid var(--border-color); border-bottom: none; justify-content: flex-end; gap: 0.5rem;">
+                <button type="button" class="btn btn-outline" data-modal-close>Cancel</button>
+                <button type="submit" class="btn btn-success">Record Repayment</button>
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %}

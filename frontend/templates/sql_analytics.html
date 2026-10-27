@@ -1,0 +1,124 @@
+{% extends "base.html" %}
+
+{% block title %}10 SQL Business Problems - Project Kashi{% endblock %}
+
+{% block content %}
+<div class="page-header">
+    <div class="page-title-group">
+        <h2>10 Meaningful Business Problems & SQL Analytics</h2>
+        <p>Interactive SQL engine demonstrating Joins, Aggregation, Subqueries, HAVING, CASE, and Views.</p>
+    </div>
+    <div class="header-actions">
+        <span class="badge badge-active" style="padding: 0.5rem 1rem; font-size: 0.85rem;">
+            ⚡ MySQL 8.0 Live Execution
+        </span>
+    </div>
+</div>
+
+<div class="analytics-layout">
+    <!-- Left Navigation: 10 Problems Selector -->
+    <div class="card" style="margin-bottom: 0;">
+        <div class="card-header">
+            <div class="card-title" style="font-size: 0.95rem;">
+                <span>📋</span> Problem Statements
+            </div>
+        </div>
+        <div class="card-body" style="padding: 0.75rem;">
+            <ul class="problem-nav-list">
+                {% for pid, prob in problems.items() %}
+                <li class="problem-nav-item {% if pid == selected_id %}active{% endif %}">
+                    <a href="{{ url_for('analytics', problem=pid) }}">
+                        <div style="font-size: 0.75rem; opacity: 0.8; text-transform: uppercase;">Problem #{{ pid }}</div>
+                        <div style="margin-top: 2px;">{{ prob.title.split(': ')[1] }}</div>
+                    </a>
+                </li>
+                {% endfor %}
+            </ul>
+        </div>
+    </div>
+
+    <!-- Right Content: Query details & Results -->
+    <div>
+        <!-- Problem Card -->
+        <div class="card" style="margin-bottom: 1.5rem;">
+            <div class="card-header">
+                <div class="card-title">
+                    <span>💡</span> {{ current.title }}
+                </div>
+            </div>
+            <div class="card-body">
+                <div style="margin-bottom: 1rem;">
+                    <label style="font-size: 0.8rem; text-transform: uppercase; letter-spacing: 0.5px; color: var(--text-secondary);">
+                        Business Question / Practical Banking Scenario:
+                    </label>
+                    <p style="font-size: 1.05rem; font-weight: 600; color: var(--primary); margin-top: 0.25rem;">
+                        "{{ current.business_question }}"
+                    </p>
+                </div>
+
+                <div style="margin-bottom: 1rem;">
+                    <label style="font-size: 0.8rem; text-transform: uppercase; letter-spacing: 0.5px; color: var(--text-secondary);">
+                        Key DBMS Concepts Demonstrated:
+                    </label>
+                    <div class="concept-pill-group">
+                        {% for concept in current.dbms_concepts %}
+                        <span class="concept-pill">{{ concept }}</span>
+                        {% endfor %}
+                    </div>
+                </div>
+
+                <div>
+                    <label style="font-size: 0.8rem; text-transform: uppercase; letter-spacing: 0.5px; color: var(--text-secondary);">
+                        Executed SQL Query:
+                    </label>
+                    <pre class="sql-code-block"><code>{{ current.sql.strip() }}</code></pre>
+                </div>
+            </div>
+        </div>
+
+        <!-- Query Execution Results Table -->
+        <div class="card">
+            <div class="card-header">
+                <div class="card-title">
+                    <span>📊</span> Live Query Results ({{ results|length }} Rows Returned)
+                </div>
+                <small class="mono text-muted">Execution Status: SUCCESS</small>
+            </div>
+            <div class="table-responsive">
+                <table>
+                    <thead>
+                        <tr>
+                            {% for col in columns %}
+                            <th>{{ col }}</th>
+                            {% endfor %}
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for row in results %}
+                        <tr>
+                            {% for col in columns %}
+                            <td>
+                                {% if row[col] is none %}
+                                    <span class="text-muted">NULL</span>
+                                {% elif 'Balance' in col or 'Deposits' in col or 'Amount' in col or 'Turnover' in col or 'Salary' in col %}
+                                    <strong style="color: var(--primary);">₹{{ "{:,.2f}".format(row[col]) }}</strong>
+                                {% else %}
+                                    {{ row[col] }}
+                                {% endif %}
+                            </td>
+                            {% endfor %}
+                        </tr>
+                        {% else %}
+                        <tr>
+                            <td colspan="{{ columns|length or 1 }}" style="text-align: center; color: var(--text-muted); padding: 2.5rem;">
+                                Query returned 0 rows.
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

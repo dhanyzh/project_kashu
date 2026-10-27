@@ -1,0 +1,233 @@
+{% extends "base.html" %}
+
+{% block title %}Operations & Passbook - Project Kashi Banking System{% endblock %}
+
+{% block content %}
+<div class="page-header">
+    <div class="page-title-group">
+        <h2>Banking Operations & Passbook</h2>
+        <p>Execute financial transactions and review the tamper-evident passbook ledger.</p>
+    </div>
+</div>
+
+<!-- Operations Hub Tabs (Atomic Transfer, Deposit, Withdraw) -->
+<div class="card" style="margin-bottom: 2rem;">
+    <div class="card-header" style="padding-bottom: 0; background: #ffffff;">
+        <div style="display: flex; gap: 0.5rem;">
+            <button type="button" class="btn btn-outline tab-btn active" data-tab-target="tab-transfer">
+                🔄 Fund Transfer (ACID Atomic)
+            </button>
+            <button type="button" class="btn btn-outline tab-btn" data-tab-target="tab-deposit">
+                📥 Cash Deposit
+            </button>
+            <button type="button" class="btn btn-outline tab-btn" data-tab-target="tab-withdraw">
+                📤 Cash Withdrawal
+            </button>
+        </div>
+    </div>
+
+    <div class="card-body">
+        <!-- 1. Atomic Fund Transfer Tab -->
+        <div id="tab-transfer" class="tab-pane">
+            <h4 style="margin-bottom: 0.5rem; color: var(--primary);">Inter-Account Fund Transfer</h4>
+            <p style="font-size: 0.85rem; color: var(--text-secondary); margin-bottom: 1.25rem;">
+                Executes via MySQL Stored Procedure <code>sp_transfer_funds</code> with <code>START TRANSACTION</code>, row-level locking (<code>FOR UPDATE</code>), and automatic <code>COMMIT</code> / <code>ROLLBACK</code>.
+            </p>
+            <form method="POST" action="{{ url_for('transaction_transfer') }}">
+                <div class="form-grid">
+                    <div class="form-group">
+                        <label>From Sender Account <span class="req">*</span></label>
+                        <select name="sender_acc_id" required>
+                            <option value="">-- Select Debited Account --</option>
+                            {% for a in accounts %}
+                            <option value="{{ a.AccountID }}">
+                                {{ a.AccountNumber }} ({{ a.OwnerName }}) — Avail: ₹{{ "{:,.2f}".format(a.Balance) }}
+                            </option>
+                            {% endfor %}
+                        </select>
+                    </div>
+
+                    <div class="form-group">
+                        <label>To Beneficiary Account <span class="req">*</span></label>
+                        <select name="receiver_acc_id" required>
+                            <option value="">-- Select Credited Account --</option>
+                            {% for a in accounts %}
+                            <option value="{{ a.AccountID }}">
+                                {{ a.AccountNumber }} ({{ a.OwnerName }})
+                            </option>
+                            {% endfor %}
+                        </select>
+                    </div>
+
+                    <div class="form-group">
+                        <label>Transfer Amount (₹) <span class="req">*</span></label>
+                        <input type="number" step="0.01" min="1" name="amount" required placeholder="e.g. 5000.00">
+                    </div>
+
+                    <div class="form-group">
+                        <label>Remarks / Purpose</label>
+                        <input type="text" name="description" placeholder="e.g. Rent, Tuition, Business invoice">
+                    </div>
+                </div>
+
+                <div style="display: flex; justify-content: flex-end;">
+                    <button type="submit" class="btn btn-primary" onclick="return confirm('Authorize this atomic fund transfer?');">
+                        Execute Transfer &rarr;
+                    </button>
+                </div>
+            </form>
+        </div>
+
+        <!-- 2. Deposit Tab -->
+        <div id="tab-deposit" class="tab-pane" style="display: none;">
+            <h4 style="margin-bottom: 0.5rem; color: var(--primary);">Account Cash Deposit</h4>
+            <p style="font-size: 0.85rem; color: var(--text-secondary); margin-bottom: 1.25rem;">
+                Executes via Stored Procedure <code>sp_deposit_money</code>, crediting the balance and generating an instant receipt.
+            </p>
+            <form method="POST" action="{{ url_for('transaction_deposit') }}">
+                <div class="form-grid">
+                    <div class="form-group">
+                        <label>Deposit into Account <span class="req">*</span></label>
+                        <select name="account_id" required>
+                            <option value="">-- Choose Account --</option>
+                            {% for a in accounts %}
+                            <option value="{{ a.AccountID }}">
+                                {{ a.AccountNumber }} ({{ a.OwnerName }}) — Cur Bal: ₹{{ "{:,.2f}".format(a.Balance) }}
+                            </option>
+                            {% endfor %}
+                        </select>
+                    </div>
+
+                    <div class="form-group">
+                        <label>Deposit Amount (₹) <span class="req">*</span></label>
+                        <input type="number" step="0.01" min="1" name="amount" required placeholder="Amount to deposit">
+                    </div>
+
+                    <div class="form-group full-width">
+                        <label>Description / Deposit Slip Notes</label>
+                        <input type="text" name="description" value="Cash Deposit at Branch Counter">
+                    </div>
+                </div>
+
+                <div style="display: flex; justify-content: flex-end;">
+                    <button type="submit" class="btn btn-success">
+                        + Credit Account
+                    </button>
+                </div>
+            </form>
+        </div>
+
+        <!-- 3. Withdrawal Tab -->
+        <div id="tab-withdraw" class="tab-pane" style="display: none;">
+            <h4 style="margin-bottom: 0.5rem; color: var(--primary);">Account Cash Withdrawal</h4>
+            <p style="font-size: 0.85rem; color: var(--text-secondary); margin-bottom: 1.25rem;">
+                Executes via Stored Procedure <code>sp_withdraw_money</code> with database balance verification and constraint protection.
+            </p>
+            <form method="POST" action="{{ url_for('transaction_withdraw') }}">
+                <div class="form-grid">
+                    <div class="form-group">
+                        <label>Withdraw from Account <span class="req">*</span></label>
+                        <select name="account_id" required>
+                            <option value="">-- Choose Account --</option>
+                            {% for a in accounts %}
+                            <option value="{{ a.AccountID }}">
+                                {{ a.AccountNumber }} ({{ a.OwnerName }}) — Avail: ₹{{ "{:,.2f}".format(a.Balance) }}
+                            </option>
+                            {% endfor %}
+                        </select>
+                    </div>
+
+                    <div class="form-group">
+                        <label>Withdrawal Amount (₹) <span class="req">*</span></label>
+                        <input type="number" step="0.01" min="1" name="amount" required placeholder="Amount to withdraw">
+                    </div>
+
+                    <div class="form-group full-width">
+                        <label>Description / Terminal Notes</label>
+                        <input type="text" name="description" value="Branch Counter Cash Withdrawal">
+                    </div>
+                </div>
+
+                <div style="display: flex; justify-content: flex-end;">
+                    <button type="submit" class="btn btn-danger">
+                        - Debit Account
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<!-- Passbook Ledger Section with Filter -->
+<div class="card">
+    <div class="card-header">
+        <div class="card-title">
+            <span>📑</span> Passbook Audit Ledger
+        </div>
+        <!-- Filter Form -->
+        <form method="GET" action="{{ url_for('transactions_list') }}" style="display: flex; gap: 0.5rem;">
+            <input type="text" name="account_number" placeholder="Filter by Acc #" value="{{ acc_filter }}" class="mono" style="width: 160px; font-size: 0.8rem; padding: 0.4rem 0.6rem;">
+            <select name="txn_type" style="font-size: 0.8rem; padding: 0.4rem 0.6rem;">
+                <option value="">All Types</option>
+                <option value="DEPOSIT" {% if type_filter == 'DEPOSIT' %}selected{% endif %}>DEPOSIT</option>
+                <option value="WITHDRAWAL" {% if type_filter == 'WITHDRAWAL' %}selected{% endif %}>WITHDRAWAL</option>
+                <option value="TRANSFER_IN" {% if type_filter == 'TRANSFER_IN' %}selected{% endif %}>TRANSFER_IN</option>
+                <option value="TRANSFER_OUT" {% if type_filter == 'TRANSFER_OUT' %}selected{% endif %}>TRANSFER_OUT</option>
+            </select>
+            <button type="submit" class="btn btn-primary btn-sm">Filter</button>
+            {% if acc_filter or type_filter %}
+            <a href="{{ url_for('transactions_list') }}" class="btn btn-outline btn-sm">Reset</a>
+            {% endif %}
+        </form>
+    </div>
+
+    <div class="table-responsive">
+        <table>
+            <thead>
+                <tr>
+                    <th>Txn ID</th>
+                    <th>Date & Time</th>
+                    <th>Reference Number</th>
+                    <th>Account No</th>
+                    <th>Customer Name</th>
+                    <th>Branch</th>
+                    <th>Type</th>
+                    <th>Amount</th>
+                    <th>Remarks</th>
+                    <th>Status</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for t in transactions %}
+                <tr>
+                    <td class="mono">#{{ t.TransactionID }}</td>
+                    <td>{{ t.TransactionDate.strftime('%d-%b-%Y %H:%M') if t.TransactionDate else '-' }}</td>
+                    <td class="mono" style="font-size: 0.8rem; font-weight: 600;">{{ t.ReferenceNumber }}</td>
+                    <td class="mono">{{ t.AccountNumber }}</td>
+                    <td>{{ t.AccountHolder or '-' }}</td>
+                    <td>{{ t.BranchName }}</td>
+                    <td>
+                        <span class="badge badge-{{ t.TransactionType|lower }}">
+                            {{ t.TransactionType }}
+                        </span>
+                    </td>
+                    <td style="font-weight: 800; color: {% if t.TransactionType in ['DEPOSIT', 'TRANSFER_IN'] %}var(--success){% else %}var(--danger){% endif %};">
+                        {% if t.TransactionType in ['DEPOSIT', 'TRANSFER_IN'] %}+{% else %}-{% endif %}₹{{ "{:,.2f}".format(t.Amount) }}
+                    </td>
+                    <td style="color: var(--text-secondary); max-width: 220px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">
+                        {{ t.Description or '-' }}
+                    </td>
+                    <td>
+                        <span class="badge badge-active">{{ t.TransactionStatus }}</span>
+                    </td>
+                </tr>
+                {% else %}
+                <tr>
+                    <td colspan="10" style="text-align: center; color: var(--text-muted); padding: 2.5rem;">No transaction records found matching filters.</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+{% endblock %}

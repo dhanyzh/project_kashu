@@ -1,0 +1,202 @@
+{% extends "base.html" %}
+
+{% block title %}Branches & Staff - Project Kashi Banking System{% endblock %}
+
+{% block content %}
+<div class="page-header">
+    <div class="page-title-group">
+        <h2>Branches & Staff Roster</h2>
+        <p>Overview of bank branches, IFSC network, and banking personnel.</p>
+    </div>
+    <div class="header-actions">
+        <button type="button" class="btn btn-outline" data-modal-target="add-employee-modal">
+            + Add Employee
+        </button>
+        <button type="button" class="btn btn-primary" data-modal-target="add-branch-modal">
+            + Add Branch
+        </button>
+    </div>
+</div>
+
+<!-- Branches Grid -->
+<div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 1.5rem; margin-bottom: 2rem;">
+    {% for b in branches %}
+    <div class="card" style="margin-bottom: 0;">
+        <div class="card-header">
+            <div>
+                <h4 style="color: var(--primary); font-size: 1.05rem;">{{ b.BranchName }}</h4>
+                <span class="mono" style="color: var(--brand-blue); font-size: 0.8rem; font-weight: 700;">{{ b.IFSCCode }}</span>
+            </div>
+            <span class="badge badge-primary-holder">{{ b.City }}</span>
+        </div>
+        <div class="card-body">
+            <p style="font-size: 0.85rem; color: var(--text-secondary); margin-bottom: 0.75rem;">
+                📍 {{ b.Address }}, {{ b.City }}, {{ b.State }}
+            </p>
+            <p style="font-size: 0.85rem; color: var(--text-secondary); margin-bottom: 1rem;">
+                📞 {{ b.ContactNumber }}
+            </p>
+            <div style="display: flex; justify-content: space-between; border-top: 1px solid var(--border-color); padding-top: 0.75rem; font-size: 0.85rem;">
+                <div>
+                    <span class="text-muted">Accounts:</span> <strong>{{ b.TotalAccounts }}</strong>
+                </div>
+                <div>
+                    <span class="text-muted">Staff:</span> <strong>{{ b.TotalStaff }}</strong>
+                </div>
+                <div>
+                    <span class="text-muted">Deposits:</span> <strong style="color: var(--success);">₹{{ "{:,.2f}".format(b.TotalDeposits or 0) }}</strong>
+                </div>
+            </div>
+        </div>
+    </div>
+    {% endfor %}
+</div>
+
+<!-- Employees Directory -->
+<div class="card">
+    <div class="card-header">
+        <div class="card-title">
+            <span>👔</span> Banking Personnel Roster ({{ employees|length }} Employees)
+        </div>
+        <div style="font-size: 0.85rem; color: var(--text-muted);">
+            Table 3: <code>EMPLOYEE</code> (Referential Integrity with <code>BRANCH</code>)
+        </div>
+    </div>
+    <div class="table-responsive">
+        <table>
+            <thead>
+                <tr>
+                    <th>Emp ID</th>
+                    <th>Employee Name</th>
+                    <th>Designation</th>
+                    <th>Branch</th>
+                    <th>Contact Info</th>
+                    <th>Monthly Salary</th>
+                    <th>Joining Date</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for e in employees %}
+                <tr>
+                    <td class="mono">#EMP-{{ e.EmployeeID }}</td>
+                    <td><strong>{{ e.EmployeeName }}</strong></td>
+                    <td>
+                        <span class="badge badge-active" style="background: #f1f5f9; color: var(--text-primary); border: 1px solid var(--border-color);">
+                            {{ e.Designation }}
+                        </span>
+                    </td>
+                    <td>{{ e.BranchName }}</td>
+                    <td>
+                        <div>📞 {{ e.Mobile }}</div>
+                        <small class="text-muted">✉️ {{ e.Email }}</small>
+                    </td>
+                    <td style="font-weight: 700; color: var(--primary);">₹{{ "{:,.2f}".format(e.Salary) }}</td>
+                    <td>{{ e.JoiningDate.strftime('%d-%b-%Y') if e.JoiningDate else '-' }}</td>
+                </tr>
+                {% else %}
+                <tr>
+                    <td colspan="7" style="text-align: center; color: var(--text-muted); padding: 2.5rem;">No employees recorded.</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+
+<!-- Modal: Add Branch -->
+<div id="add-branch-modal" class="modal">
+    <div class="modal-content">
+        <div class="modal-header">
+            <h3>Add New Bank Branch</h3>
+            <button type="button" class="modal-close" data-modal-close>&times;</button>
+        </div>
+        <form method="POST" action="{{ url_for('branch_add') }}">
+            <div class="modal-body">
+                <div class="form-grid">
+                    <div class="form-group full-width">
+                        <label>Branch Name <span class="req">*</span></label>
+                        <input type="text" name="branch_name" required placeholder="e.g. Sigra Sub-Branch">
+                    </div>
+                    <div class="form-group">
+                        <label>IFSC Code <span class="req">*</span></label>
+                        <input type="text" name="ifsc_code" required placeholder="e.g. KASH0001006" maxlength="20">
+                    </div>
+                    <div class="form-group">
+                        <label>Contact Phone <span class="req">*</span></label>
+                        <input type="text" name="contact_number" required placeholder="e.g. 0542-2456785">
+                    </div>
+                    <div class="form-group">
+                        <label>City <span class="req">*</span></label>
+                        <input type="text" name="city" required value="Varanasi">
+                    </div>
+                    <div class="form-group">
+                        <label>State <span class="req">*</span></label>
+                        <input type="text" name="state" required value="Uttar Pradesh">
+                    </div>
+                    <div class="form-group full-width">
+                        <label>Complete Branch Address <span class="req">*</span></label>
+                        <textarea name="address" required rows="2" placeholder="Street, landmark, PIN code"></textarea>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-header" style="border-top: 1px solid var(--border-color); border-bottom: none; justify-content: flex-end; gap: 0.5rem;">
+                <button type="button" class="btn btn-outline" data-modal-close>Cancel</button>
+                <button type="submit" class="btn btn-primary">Save Branch</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- Modal: Add Employee -->
+<div id="add-employee-modal" class="modal">
+    <div class="modal-content">
+        <div class="modal-header">
+            <h3>Add Bank Employee</h3>
+            <button type="button" class="modal-close" data-modal-close>&times;</button>
+        </div>
+        <form method="POST" action="{{ url_for('employee_add') }}">
+            <div class="modal-body">
+                <div class="form-grid">
+                    <div class="form-group full-width">
+                        <label>Employee Full Name <span class="req">*</span></label>
+                        <input type="text" name="employee_name" required placeholder="e.g. Vikas Srivastava">
+                    </div>
+                    <div class="form-group">
+                        <label>Mobile Number <span class="req">*</span></label>
+                        <input type="tel" name="mobile" required pattern="[0-9]{10}" placeholder="10-digit mobile">
+                    </div>
+                    <div class="form-group">
+                        <label>Official Email <span class="req">*</span></label>
+                        <input type="email" name="email" required placeholder="vikas.s@kashibank.in">
+                    </div>
+                    <div class="form-group">
+                        <label>Designation <span class="req">*</span></label>
+                        <input type="text" name="designation" required placeholder="e.g. Cashier / Assistant Manager">
+                    </div>
+                    <div class="form-group">
+                        <label>Monthly Salary (₹) <span class="req">*</span></label>
+                        <input type="number" step="0.01" min="1000" name="salary" required placeholder="e.g. 55000">
+                    </div>
+                    <div class="form-group">
+                        <label>Assigned Branch <span class="req">*</span></label>
+                        <select name="branch_id" required>
+                            <option value="">-- Choose Branch --</option>
+                            {% for b in branches %}
+                            <option value="{{ b.BranchID }}">{{ b.BranchName }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label>Joining Date <span class="req">*</span></label>
+                        <input type="date" name="joining_date" required>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-header" style="border-top: 1px solid var(--border-color); border-bottom: none; justify-content: flex-end; gap: 0.5rem;">
+                <button type="button" class="btn btn-outline" data-modal-close>Cancel</button>
+                <button type="submit" class="btn btn-primary">Register Employee</button>
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %}
