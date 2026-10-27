@@ -1,68 +1,132 @@
 {% extends "base.html" %}
 
-{% block title %}Passbook - Shreehari Finance{% endblock %}
+{% block title %}Transaction Passbook - Shreehari Finance{% endblock %}
 
 {% block content %}
-<div class="section-title">
-    <h2>Transaction Passbook Ledger</h2>
-    <div style="display: flex; gap: 8px;">
-        <a href="{{ url_for('deposit') }}" class="btn btn-success">+ Deposit</a>
-        <a href="{{ url_for('withdraw') }}" class="btn btn-danger">- Withdraw</a>
-        <a href="{{ url_for('transfer') }}" class="btn btn-primary">Transfer</a>
+<div class="page-header">
+    <div class="page-title">
+        <h2>Passbook Audit Ledger</h2>
+        <p>Complete historical log of all cash movements, counter deposits, and inter-account settlements.</p>
+    </div>
+    <div style="display: flex; gap: 0.6rem; flex-wrap: wrap;">
+        <a href="{{ url_for('deposit') }}" class="btn btn-success btn-sm">
+            <span>+</span> Deposit
+        </a>
+        <a href="{{ url_for('withdraw') }}" class="btn btn-danger btn-sm">
+            <span>-</span> Withdraw
+        </a>
+        <a href="{{ url_for('transfer') }}" class="btn btn-primary btn-sm">
+            <span>🚀</span> Transfer
+        </a>
     </div>
 </div>
 
-<!-- Search / Filter Card -->
-<div class="card" style="padding: 15px; margin-bottom: 20px;">
-    <form method="GET" action="{{ url_for('passbook') }}" style="display: flex; gap: 10px; align-items: center; flex-wrap: wrap;">
-        <label style="margin: 0;">Filter by Account Number:</label>
-        <input type="text" name="account_number" placeholder="e.g. 1001002001" value="{{ filter_acc }}" style="width: 220px;">
-        <button type="submit" class="btn btn-primary">Search</button>
-        {% if filter_acc %}
-        <a href="{{ url_for('passbook') }}" class="btn btn-secondary">Clear Filter</a>
-        {% endif %}
-    </form>
+<!-- Search & Instant Filter Toolbar -->
+<div class="panel" style="margin-bottom: 1.5rem;">
+    <div class="panel-body" style="padding: 1.25rem 1.75rem;">
+        <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 1rem;">
+            
+            <!-- SQL Server-side Filter -->
+            <form method="GET" action="{{ url_for('passbook') }}" style="display: flex; gap: 0.6rem; align-items: center; flex-wrap: wrap;">
+                <label style="margin: 0; white-space: nowrap;">Search Account:</label>
+                <input type="text" name="account_number" placeholder="e.g. 1001002001" value="{{ filter_acc }}" style="width: 200px; padding: 0.5rem 0.85rem;">
+                <button type="submit" class="btn btn-primary btn-sm">Filter</button>
+                {% if filter_acc %}
+                <a href="{{ url_for('passbook') }}" class="btn btn-outline btn-sm">Clear Filter</a>
+                {% endif %}
+            </form>
+
+            <!-- Instant Live Client Search -->
+            <div style="display: flex; align-items: center; gap: 0.5rem;">
+                <label style="margin: 0; color: var(--text-muted); font-size: 0.8rem;">Live Search:</label>
+                <input type="text" id="table-live-search" placeholder="Type name, ref, or type..." style="width: 220px; padding: 0.5rem 0.85rem;">
+            </div>
+
+        </div>
+    </div>
 </div>
 
-<!-- Passbook Table -->
-<div class="card">
-    <div class="table-responsive">
+<!-- Passbook Table Panel -->
+<div class="panel">
+    <div class="panel-header">
+        <span class="panel-title">
+            <span>📜</span> Transaction History ({% if filter_acc %}Account #{{ filter_acc }}{% else %}All Accounts{% endif %})
+        </span>
+        <span class="badge badge-pill-role">{{ txns|length }} Transactions Logged</span>
+    </div>
+
+    <div class="table-wrap">
         <table>
             <thead>
                 <tr>
                     <th>Txn ID</th>
                     <th>Date &amp; Time</th>
-                    <th>Ref Number</th>
-                    <th>Account No</th>
-                    <th>Customer Name</th>
+                    <th>Reference No</th>
+                    <th>Account &amp; Customer</th>
                     <th>Type</th>
-                    <th>Amount (₹)</th>
-                    <th>Description</th>
+                    <th style="text-align: right;">Amount</th>
+                    <th>Remarks</th>
                     <th>Status</th>
                 </tr>
             </thead>
             <tbody>
                 {% for t in txns %}
                 <tr>
-                    <td>#{{ t.TransactionID }}</td>
-                    <td>{{ t.TransactionDate.strftime('%d-%b-%Y %H:%M') if t.TransactionDate else '-' }}</td>
-                    <td><code>{{ t.ReferenceNumber }}</code></td>
-                    <td><strong>{{ t.AccountNumber }}</strong></td>
-                    <td>{{ t.CustomerName }}</td>
+                    <td>
+                        <span class="mono" style="color: var(--text-muted);">#{{ t.TransactionID }}</span>
+                    </td>
+                    <td>
+                        <div style="font-weight: 600; font-size: 0.85rem;">
+                            {{ t.TransactionDate.strftime('%d %b %Y') if t.TransactionDate else '-' }}
+                        </div>
+                        <div style="font-size: 0.75rem; color: var(--text-muted);">
+                            {{ t.TransactionDate.strftime('%H:%M:%S') if t.TransactionDate else '' }}
+                        </div>
+                    </td>
+                    <td>
+                        <span class="mono" style="background: #F1F5F9; padding: 0.2rem 0.5rem; border-radius: 4px; font-size: 0.8rem; color: #334155;">
+                            {{ t.ReferenceNumber }}
+                        </span>
+                    </td>
+                    <td>
+                        <div style="display: flex; align-items: center; gap: 0.6rem;">
+                            <span class="avatar avatar-sm avatar-cyan">
+                                {{ t.CustomerName[:2].upper() if t.CustomerName else 'AC' }}
+                            </span>
+                            <div>
+                                <div style="font-weight: 700;">{{ t.CustomerName }}</div>
+                                <div class="mono" style="font-size: 0.75rem; color: var(--text-muted);">
+                                    Acc: {{ t.AccountNumber }}
+                                </div>
+                            </div>
+                        </div>
+                    </td>
                     <td>
                         <span class="badge badge-{{ t.TransactionType|lower }}">
                             {{ t.TransactionType }}
                         </span>
                     </td>
-                    <td style="font-weight: bold; color: {% if t.TransactionType in ['DEPOSIT', 'TRANSFER_IN'] %}#28a745{% else %}#dc3545{% endif %};">
+                    <td style="text-align: right; font-weight: 800; font-family: 'JetBrains Mono', monospace; font-size: 0.95rem; color: {% if t.TransactionType in ['DEPOSIT', 'TRANSFER_IN'] %}#10B981{% else %}#EF4444{% endif %};">
                         {% if t.TransactionType in ['DEPOSIT', 'TRANSFER_IN'] %}+{% else %}-{% endif %}₹{{ "{:,.2f}".format(t.Amount) }}
                     </td>
-                    <td>{{ t.Description or '-' }}</td>
-                    <td><span class="badge badge-active">{{ t.TransactionStatus }}</span></td>
+                    <td>
+                        <span style="font-size: 0.85rem; color: var(--text-muted);">
+                            {{ t.Description or '-' }}
+                        </span>
+                    </td>
+                    <td>
+                        <span class="badge badge-active">
+                            ✓ {{ t.TransactionStatus }}
+                        </span>
+                    </td>
                 </tr>
                 {% else %}
                 <tr>
-                    <td colspan="9" style="text-align: center; color: #888; padding: 25px;">No transactions recorded.</td>
+                    <td colspan="8" style="text-align: center; color: var(--text-muted); padding: 3rem;">
+                        <div style="font-size: 2.5rem; margin-bottom: 0.5rem;">📜</div>
+                        <p style="font-weight: 600;">No transactions found.</p>
+                        <p style="font-size: 0.8rem;">Perform a deposit, withdrawal, or transfer to see ledger entries here.</p>
+                    </td>
                 </tr>
                 {% endfor %}
             </tbody>

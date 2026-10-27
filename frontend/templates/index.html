@@ -1,57 +1,107 @@
 {% extends "base.html" %}
 
-{% block title %}Home - Shreehari Finance{% endblock %}
+{% block title %}Dashboard - Shreehari Finance{% endblock %}
 
 {% block content %}
-<div class="section-title">
-    <h2>Bank Dashboard Overview</h2>
-    <div>
-        <a href="{{ url_for('open_account') }}" class="btn btn-primary">+ Open Bank Account</a>
-        <a href="{{ url_for('transfer') }}" class="btn btn-success">Transfer Funds</a>
+<div class="page-hero">
+    <div class="page-hero-text">
+        <h2>Executive Banking Overview</h2>
+        <p>Live financial position, aggregate liquidity, and real-time transaction ledger.</p>
+    </div>
+    <div style="display: flex; gap: 0.75rem;">
+        <a href="{{ url_for('transfer') }}" class="btn btn-primary">⚡ Quick Transfer</a>
+        <a href="{{ url_for('open_account') }}" class="btn btn-outline">+ Open Account</a>
     </div>
 </div>
 
-<!-- 4 Simple Stat Boxes -->
-<div class="grid-cards">
-    <div class="stat-box green">
-        <p>Total Bank Balance</p>
-        <h3>₹{{ "{:,.2f}".format(total_balance) }}</h3>
+<!-- 4 Modern Stat Cards -->
+<div class="metrics-row">
+    <div class="metric-card green">
+        <div class="metric-card-top">
+            <span class="metric-label">Total Deposits</span>
+            <div class="metric-icon-box" style="background: #ECFDF5; color: #10B981;">💰</div>
+        </div>
+        <div class="metric-value">₹{{ "{:,.2f}".format(total_balance) }}</div>
+        <div class="metric-subtitle">Across {{ total_accounts }} active bank accounts</div>
     </div>
-    <div class="stat-box">
-        <p>Active Accounts</p>
-        <h3>{{ total_accounts }}</h3>
+
+    <div class="metric-card purple">
+        <div class="metric-card-top">
+            <span class="metric-label">Active Accounts</span>
+            <div class="metric-icon-box" style="background: #F3E8FF; color: #9333EA;">💳</div>
+        </div>
+        <div class="metric-value">{{ total_accounts }}</div>
+        <div class="metric-subtitle">Saving, Current &amp; Salary types</div>
     </div>
-    <div class="stat-box blue">
-        <p>Registered Customers</p>
-        <h3>{{ total_customers }}</h3>
+
+    <div class="metric-card">
+        <div class="metric-card-top">
+            <span class="metric-label">Total Customers</span>
+            <div class="metric-icon-box" style="background: #EFF6FF; color: #3A86FF;">👥</div>
+        </div>
+        <div class="metric-value">{{ total_customers }}</div>
+        <div class="metric-subtitle">Registered KYC account holders</div>
     </div>
-    <div class="stat-box orange">
-        <p>Total Transactions</p>
-        <h3>{{ total_txns }}</h3>
+
+    <div class="metric-card amber">
+        <div class="metric-card-top">
+            <span class="metric-label">Transactions</span>
+            <div class="metric-icon-box" style="background: #FFFBEB; color: #F59E0B;">📑</div>
+        </div>
+        <div class="metric-value">{{ total_txns }}</div>
+        <div class="metric-subtitle">Audited financial operations</div>
     </div>
 </div>
 
-<!-- Quick Navigation Buttons -->
-<div class="card" style="margin-bottom: 25px;">
-    <h3 style="margin-bottom: 12px; color: #0b3954;">Quick Operations</h3>
-    <div style="display: flex; gap: 10px; flex-wrap: wrap;">
-        <a href="{{ url_for('open_account') }}" class="btn btn-primary">1. Open New Bank Account</a>
-        <a href="{{ url_for('deposit') }}" class="btn btn-success">2. Deposit Cash</a>
-        <a href="{{ url_for('withdraw') }}" class="btn btn-danger">3. Withdraw Cash</a>
-        <a href="{{ url_for('transfer') }}" class="btn btn-primary">4. Transfer Money (ACID)</a>
-        <a href="{{ url_for('passbook') }}" class="btn btn-secondary">5. View Passbook</a>
-    </div>
+<!-- Action Tiles Grid -->
+<div class="action-grid">
+    <a href="{{ url_for('open_account') }}" class="action-tile">
+        <div class="action-tile-icon">➕</div>
+        <div class="action-tile-info">
+            <h4>Open Account</h4>
+            <p>Register new customer &amp; issue account</p>
+        </div>
+    </a>
+
+    <a href="{{ url_for('deposit') }}" class="action-tile green">
+        <div class="action-tile-icon">📥</div>
+        <div class="action-tile-info">
+            <h4>Deposit Cash</h4>
+            <p>Credit funds to account</p>
+        </div>
+    </a>
+
+    <a href="{{ url_for('withdraw') }}" class="action-tile rose">
+        <div class="action-tile-icon">📤</div>
+        <div class="action-tile-info">
+            <h4>Withdraw Cash</h4>
+            <p>Debit cash with balance check</p>
+        </div>
+    </a>
+
+    <a href="{{ url_for('transfer') }}" class="action-tile purple">
+        <div class="action-tile-icon">🔄</div>
+        <div class="action-tile-info">
+            <h4>Fund Transfer</h4>
+            <p>Atomic transfer with ACID commit</p>
+        </div>
+    </a>
 </div>
 
-<!-- Recent Transactions Table -->
-<div class="card">
-    <h3 style="margin-bottom: 15px; color: #0b3954;">Recent 5 Transactions</h3>
-    <div class="table-responsive">
+<!-- Recent Transactions Panel -->
+<div class="panel-card">
+    <div class="panel-header">
+        <div class="panel-title">
+            <span>⏱️</span> Recent Transactions Activity
+        </div>
+        <a href="{{ url_for('passbook') }}" class="btn btn-outline btn-sm">Full Passbook &rarr;</a>
+    </div>
+    <div class="table-wrap">
         <table>
             <thead>
                 <tr>
                     <th>Date &amp; Time</th>
-                    <th>Reference Number</th>
+                    <th>Reference No</th>
                     <th>Account No</th>
                     <th>Type</th>
                     <th>Amount</th>
@@ -61,18 +111,28 @@
             <tbody>
                 {% for t in recent_txns %}
                 <tr>
-                    <td>{{ t.TransactionDate.strftime('%d-%b-%Y %H:%M') if t.TransactionDate else '-' }}</td>
-                    <td><code>{{ t.ReferenceNumber }}</code></td>
-                    <td><strong>{{ t.AccountNumber }}</strong></td>
-                    <td><span class="badge badge-{{ t.TransactionType|lower }}">{{ t.TransactionType }}</span></td>
-                    <td style="font-weight: bold; color: {% if t.TransactionType in ['DEPOSIT', 'TRANSFER_IN'] %}#28a745{% else %}#dc3545{% endif %};">
+                    <td style="font-size: 0.85rem; color: var(--text-muted);">
+                        {{ t.TransactionDate.strftime('%d-%b-%Y %H:%M') if t.TransactionDate else '-' }}
+                    </td>
+                    <td class="mono" style="color: var(--brand-indigo);">{{ t.ReferenceNumber }}</td>
+                    <td class="mono"><strong>{{ t.AccountNumber }}</strong></td>
+                    <td>
+                        <span class="badge badge-{{ t.TransactionType|lower }}">
+                            {{ t.TransactionType }}
+                        </span>
+                    </td>
+                    <td style="font-weight: 800; font-size: 0.95rem; color: {% if t.TransactionType in ['DEPOSIT', 'TRANSFER_IN'] %}var(--success){% else %}var(--danger){% endif %};">
                         {% if t.TransactionType in ['DEPOSIT', 'TRANSFER_IN'] %}+{% else %}-{% endif %}₹{{ "{:,.2f}".format(t.Amount) }}
                     </td>
-                    <td>{{ t.Description }}</td>
+                    <td style="color: var(--text-muted); max-width: 250px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">
+                        {{ t.Description or '-' }}
+                    </td>
                 </tr>
                 {% else %}
                 <tr>
-                    <td colspan="6" style="text-align: center; color: #888;">No transactions yet.</td>
+                    <td colspan="6" style="text-align: center; color: var(--text-muted); padding: 2.5rem;">
+                        No transactions recorded yet.
+                    </td>
                 </tr>
                 {% endfor %}
             </tbody>

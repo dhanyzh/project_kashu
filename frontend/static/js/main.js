@@ -1,94 +1,173 @@
 // ====================================================================
-// PROJECT KASHI - Client-side Utilities
-// Handles Modal Dialogs, Operations Tabs, and Interactive Helpers
+// SHREEHARI FINANCE - Interactive Client Enhancements
 // ====================================================================
 
 document.addEventListener("DOMContentLoaded", () => {
-    // 1. Modal Dialog Logic
-    const openModalBtns = document.querySelectorAll("[data-modal-target]");
-    const closeModalBtns = document.querySelectorAll("[data-modal-close]");
+    // 1. Quick Amount Chips handler
+    const chips = document.querySelectorAll(".amount-chip");
+    const amountInput = document.getElementById("amount-input");
 
-    openModalBtns.forEach(btn => {
-        btn.addEventListener("click", (e) => {
-            e.preventDefault();
-            const modalId = btn.getAttribute("data-modal-target");
-            const modal = document.getElementById(modalId);
-            if (modal) {
-                modal.classList.add("open");
+    chips.forEach(chip => {
+        chip.addEventListener("click", () => {
+            if (amountInput) {
+                const val = chip.getAttribute("data-val");
+                amountInput.value = val;
+                amountInput.focus();
+                amountInput.dispatchEvent(new Event('input'));
             }
         });
     });
 
-    closeModalBtns.forEach(btn => {
-        btn.addEventListener("click", () => {
-            const modal = btn.closest(".modal");
-            if (modal) {
-                modal.classList.remove("open");
+    // 2. Radio Card selection visual state
+    const radioCards = document.querySelectorAll(".radio-card");
+    radioCards.forEach(card => {
+        card.addEventListener("click", () => {
+            radioCards.forEach(c => c.classList.remove("active"));
+            card.classList.add("active");
+            const radio = card.querySelector("input[type='radio']");
+            if (radio) {
+                radio.checked = true;
             }
         });
     });
 
-    window.addEventListener("click", (e) => {
-        if (e.target.classList.contains("modal")) {
-            e.target.classList.remove("open");
+    // 3. Deposit Dynamic Balance Projection
+    const depositSelect = document.getElementById("deposit-account-select");
+    const depositCurrentBal = document.getElementById("deposit-current-bal");
+    const depositProjectedBal = document.getElementById("deposit-projected-bal");
+
+    function updateDepositPreview() {
+        if (!depositSelect || !depositCurrentBal) return;
+        const opt = depositSelect.options[depositSelect.selectedIndex];
+        const currentBal = opt && opt.getAttribute("data-balance") ? parseFloat(opt.getAttribute("data-balance")) : 0;
+        const amt = amountInput && amountInput.value ? parseFloat(amountInput.value) : 0;
+
+        depositCurrentBal.textContent = `₹${currentBal.toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
+        if (depositProjectedBal) {
+            const projected = currentBal + (isNaN(amt) ? 0 : amt);
+            depositProjectedBal.textContent = `₹${projected.toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
         }
-    });
+    }
 
-    // 2. Tab switching logic for Operations (Deposit, Withdraw, Transfer)
-    const tabBtns = document.querySelectorAll(".tab-btn");
-    const tabPanes = document.querySelectorAll(".tab-pane");
+    if (depositSelect) {
+        depositSelect.addEventListener("change", updateDepositPreview);
+        if (amountInput) amountInput.addEventListener("input", updateDepositPreview);
+        updateDepositPreview();
+    }
 
-    tabBtns.forEach(btn => {
-        btn.addEventListener("click", () => {
-            const targetId = btn.getAttribute("data-tab-target");
-            
-            tabBtns.forEach(b => b.classList.remove("active"));
-            tabPanes.forEach(p => p.style.display = "none");
+    // 4. Withdraw Dynamic Balance & Overdraft Warning
+    const withdrawSelect = document.getElementById("withdraw-account-select");
+    const withdrawCurrentBal = document.getElementById("withdraw-current-bal");
+    const withdrawProjectedBal = document.getElementById("withdraw-projected-bal");
+    const withdrawWarning = document.getElementById("withdraw-warning-box");
+    const withdrawSubmitBtn = document.getElementById("withdraw-submit-btn");
 
-            btn.classList.add("active");
-            const targetPane = document.getElementById(targetId);
-            if (targetPane) {
-                targetPane.style.display = "block";
+    function updateWithdrawPreview() {
+        if (!withdrawSelect || !withdrawCurrentBal) return;
+        const opt = withdrawSelect.options[withdrawSelect.selectedIndex];
+        const currentBal = opt && opt.getAttribute("data-balance") ? parseFloat(opt.getAttribute("data-balance")) : 0;
+        const amt = amountInput && amountInput.value ? parseFloat(amountInput.value) : 0;
+
+        withdrawCurrentBal.textContent = `₹${currentBal.toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
+
+        if (withdrawProjectedBal) {
+            const remaining = currentBal - (isNaN(amt) ? 0 : amt);
+            withdrawProjectedBal.textContent = `₹${remaining.toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
+
+            if (amt > currentBal && amt > 0) {
+                withdrawProjectedBal.style.color = "#dc2626";
+                if (withdrawWarning) withdrawWarning.style.display = "block";
+            } else {
+                withdrawProjectedBal.style.color = "#047857";
+                if (withdrawWarning) withdrawWarning.style.display = "none";
             }
-        });
-    });
+        }
+    }
 
-    // 3. Auto-dismiss alerts after 6 seconds
-    const alerts = document.querySelectorAll(".alert");
-    alerts.forEach(alert => {
-        setTimeout(() => {
-            alert.style.transition = "opacity 0.5s ease, transform 0.5s ease";
-            alert.style.opacity = "0";
-            alert.style.transform = "translateY(-10px)";
-            setTimeout(() => alert.remove(), 500);
-        }, 6000);
-    });
+    if (withdrawSelect) {
+        withdrawSelect.addEventListener("change", updateWithdrawPreview);
+        if (amountInput) amountInput.addEventListener("input", updateWithdrawPreview);
+        updateWithdrawPreview();
+    }
 
-    // 4. Live EMI Calculator widget if present
-    const loanAmountInput = document.getElementById("calc-loan-amount");
-    const interestRateInput = document.getElementById("calc-interest-rate");
-    const tenureMonthsInput = document.getElementById("calc-tenure-months");
-    const emiResultDisplay = document.getElementById("calc-emi-result");
+    // 5. Transfer Sender Balance Preview
+    const senderSelect = document.getElementById("sender-account-select");
+    const balancePreview = document.getElementById("available-balance-display");
 
-    function calculateLiveEMI() {
-        if (!loanAmountInput || !interestRateInput || !tenureMonthsInput || !emiResultDisplay) return;
-        const P = parseFloat(loanAmountInput.value) || 0;
-        const annualR = parseFloat(interestRateInput.value) || 0;
-        const N = parseInt(tenureMonthsInput.value) || 0;
+    function updateSenderBalancePreview() {
+        if (!senderSelect || !balancePreview) return;
+        const opt = senderSelect.options[senderSelect.selectedIndex];
+        const bal = opt ? opt.getAttribute("data-balance") : null;
+        if (bal !== null && bal !== undefined) {
+            const formatted = parseFloat(bal).toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+            balancePreview.textContent = `₹${formatted}`;
+        } else {
+            balancePreview.textContent = "₹0.00";
+        }
+    }
 
-        if (P <= 0 || annualR <= 0 || N <= 0) {
-            emiResultDisplay.textContent = "₹0.00 / mo";
+    if (senderSelect) {
+        senderSelect.addEventListener("change", updateSenderBalancePreview);
+        updateSenderBalancePreview();
+    }
+
+    // 6. Live Loan EMI Calculator
+    const loanAmtInput = document.getElementById("loan-amount-input");
+    const loanRateInput = document.getElementById("loan-rate-input");
+    const loanTenureInput = document.getElementById("loan-tenure-input");
+    const emiDisplay = document.getElementById("calculated-emi-display");
+
+    function calculateEMI() {
+        if (!loanAmtInput || !loanRateInput || !loanTenureInput || !emiDisplay) return;
+        const P = parseFloat(loanAmtInput.value);
+        const annualRate = parseFloat(loanRateInput.value);
+        const N = parseInt(loanTenureInput.value);
+
+        if (isNaN(P) || isNaN(annualRate) || isNaN(N) || P <= 0 || N <= 0) {
+            emiDisplay.textContent = "₹0.00 / mo";
             return;
         }
 
-        const r = (annualR / 12) / 100;
-        const emi = (P * r * Math.pow(1 + r, N)) / (Math.pow(1 + r, N) - 1);
-        emiResultDisplay.textContent = `₹${emi.toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 })} / mo`;
+        const R = (annualRate / 12) / 100;
+        // EMI formula: [P * R * (1+R)^N] / [(1+R)^N - 1]
+        const emi = (P * R * Math.pow(1 + R, N)) / (Math.pow(1 + R, N) - 1);
+        if (!isNaN(emi) && isFinite(emi)) {
+            emiDisplay.textContent = `₹${Math.round(emi).toLocaleString('en-IN')} / mo`;
+        }
     }
 
-    if (loanAmountInput && interestRateInput && tenureMonthsInput) {
-        loanAmountInput.addEventListener("input", calculateLiveEMI);
-        interestRateInput.addEventListener("input", calculateLiveEMI);
-        tenureMonthsInput.addEventListener("input", calculateLiveEMI);
+    if (loanAmtInput && loanRateInput && loanTenureInput) {
+        loanAmtInput.addEventListener("input", calculateEMI);
+        loanRateInput.addEventListener("input", calculateEMI);
+        loanTenureInput.addEventListener("input", calculateEMI);
+        calculateEMI();
+    }
+
+    // 7. Auto dismiss alert banners
+    const alerts = document.querySelectorAll(".alert-banner");
+    alerts.forEach(alert => {
+        setTimeout(() => {
+            alert.style.transition = "opacity 0.4s ease, transform 0.4s ease";
+            alert.style.opacity = "0";
+            alert.style.transform = "translateY(-6px)";
+            setTimeout(() => alert.remove(), 400);
+        }, 5000);
+    });
+
+    // 8. Instant Client Table Filter (for fast search)
+    const clientFilterInput = document.getElementById("table-live-search");
+    if (clientFilterInput) {
+        clientFilterInput.addEventListener("input", (e) => {
+            const query = e.target.value.toLowerCase().trim();
+            const rows = document.querySelectorAll("tbody tr");
+            rows.forEach(row => {
+                const text = row.textContent.toLowerCase();
+                if (text.includes(query)) {
+                    row.style.display = "";
+                } else {
+                    row.style.display = "none";
+                }
+            });
+        });
     }
 });

@@ -1,59 +1,136 @@
 {% extends "base.html" %}
 
-{% block title %}Customers & Accounts - Shreehari Finance{% endblock %}
+{% block title %}Customers Directory - Shreehari Finance{% endblock %}
 
 {% block content %}
-<div class="section-title">
-    <h2>Customers &amp; Bank Accounts</h2>
-    <a href="{{ url_for('open_account') }}" class="btn btn-primary">+ Open New Account</a>
+<div class="page-header">
+    <div class="page-title">
+        <h2>Customer &amp; Account Directory</h2>
+        <p>Relational mapping across <code>CUSTOMER</code>, <code>ACCOUNT_HOLDER</code>, and <code>ACCOUNT</code> tables.</p>
+    </div>
+    <div style="display: flex; gap: 0.6rem;">
+        <a href="{{ url_for('open_account') }}" class="btn btn-primary">
+            <span>+</span> Open New Account
+        </a>
+    </div>
 </div>
 
-<div class="card">
-    <p style="margin-bottom: 15px; color: #666;">
-        Demonstrating the Many-to-Many connection between <code>CUSTOMER</code> and <code>ACCOUNT</code> tables via the <code>ACCOUNT_HOLDER</code> bridge table.
-    </p>
+<!-- Instant Live Search & Filter Bar -->
+<div class="panel" style="margin-bottom: 1.5rem;">
+    <div class="panel-body" style="padding: 1.25rem 1.75rem;">
+        <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 1rem;">
+            <div style="display: flex; align-items: center; gap: 0.6rem; flex: 1; max-width: 450px;">
+                <label style="margin: 0; font-size: 0.85rem; color: var(--text-muted); white-space: nowrap;">Search Customers:</label>
+                <input type="text" id="table-live-search" placeholder="Type customer name, phone, city, or account..." style="width: 100%; padding: 0.55rem 0.9rem;">
+            </div>
 
-    <div class="table-responsive">
+            <div style="display: flex; gap: 0.75rem; align-items: center;">
+                <span class="badge badge-pill-role">{{ customers|length }} Records</span>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Customers Table Panel -->
+<div class="panel">
+    <div class="panel-header">
+        <span class="panel-title">
+            <span>👥</span> Registered Customers &amp; Linked Accounts
+        </span>
+        <span class="badge badge-active">Live RDBMS State</span>
+    </div>
+
+    <div class="table-wrap">
         <table>
             <thead>
                 <tr>
-                    <th>Customer ID</th>
-                    <th>Customer Name</th>
-                    <th>Mobile</th>
-                    <th>Email</th>
-                    <th>City</th>
+                    <th>Customer</th>
+                    <th>Contact Details</th>
+                    <th>Location</th>
                     <th>Account No</th>
-                    <th>Account Type</th>
-                    <th>Branch</th>
-                    <th>Current Balance</th>
+                    <th>Type &amp; Branch</th>
+                    <th style="text-align: right;">Current Balance</th>
                     <th>Status</th>
+                    <th>Actions</th>
                 </tr>
             </thead>
             <tbody>
                 {% for c in customers %}
                 <tr>
-                    <td>#{{ c.CustomerID }}</td>
-                    <td><strong>{{ c.FullName }}</strong></td>
-                    <td>{{ c.Mobile }}</td>
-                    <td>{{ c.Email }}</td>
-                    <td>{{ c.City }}</td>
-                    <td><strong>{{ c.AccountNumber or 'No Account' }}</strong></td>
-                    <td>{{ c.AccountType or '-' }}</td>
-                    <td>{{ c.BranchName or '-' }}</td>
-                    <td style="font-weight: bold; color: #0b3954;">
-                        {% if c.Balance is not none %}₹{{ "{:,.2f}".format(c.Balance) }}{% else %}-{% endif %}
+                    <td>
+                        <div style="display: flex; align-items: center; gap: 0.75rem;">
+                            <span class="avatar avatar-md {% if loop.index % 4 == 0 %}avatar-emerald{% elif loop.index % 4 == 1 %}avatar-amber{% elif loop.index % 4 == 2 %}avatar-rose{% else %}avatar-cyan{% endif %}">
+                                {{ c.FullName[:2].upper() if c.FullName else 'CU' }}
+                            </span>
+                            <div>
+                                <div style="font-weight: 800; font-size: 0.95rem; color: var(--brand-navy);">
+                                    {{ c.FullName }}
+                                </div>
+                                <div class="mono" style="font-size: 0.75rem; color: var(--text-muted);">
+                                    ID: #CUST-{{ c.CustomerID }}
+                                </div>
+                            </div>
+                        </div>
+                    </td>
+                    <td>
+                        <div style="font-size: 0.85rem; font-weight: 600;">{{ c.Mobile }}</div>
+                        <div style="font-size: 0.75rem; color: var(--text-muted);">{{ c.Email }}</div>
+                    </td>
+                    <td>
+                        <span style="font-size: 0.85rem; font-weight: 500;">
+                            📍 {{ c.City }}
+                        </span>
+                    </td>
+                    <td>
+                        {% if c.AccountNumber %}
+                        <span class="mono" style="background: #F1F5F9; padding: 0.25rem 0.6rem; border-radius: 4px; font-weight: 700; color: #1E293B;">
+                            {{ c.AccountNumber }}
+                        </span>
+                        {% else %}
+                        <span style="color: var(--text-light); font-size: 0.85rem;">No Active Account</span>
+                        {% endif %}
+                    </td>
+                    <td>
+                        {% if c.AccountType %}
+                        <div style="font-weight: 700; font-size: 0.85rem;">{{ c.AccountType }}</div>
+                        <div style="font-size: 0.75rem; color: var(--text-muted);">{{ c.BranchName }}</div>
+                        {% else %}
+                        <span style="color: var(--text-light);">-</span>
+                        {% endif %}
+                    </td>
+                    <td style="text-align: right; font-weight: 800; font-family: 'JetBrains Mono', monospace; font-size: 1rem; color: var(--brand-navy);">
+                        {% if c.Balance is not none %}
+                        ₹{{ "{:,.2f}".format(c.Balance) }}
+                        {% else %}
+                        <span style="color: var(--text-light);">-</span>
+                        {% endif %}
                     </td>
                     <td>
                         {% if c.Status %}
-                        <span class="badge badge-active">{{ c.Status }}</span>
+                        <span class="badge badge-active">
+                            ✓ {{ c.Status }}
+                        </span>
                         {% else %}
-                        -
+                        <span class="badge" style="background: #F1F5F9; color: #64748B;">Pending</span>
+                        {% endif %}
+                    </td>
+                    <td>
+                        {% if c.AccountNumber %}
+                        <a href="{{ url_for('passbook', account_number=c.AccountNumber) }}" class="btn btn-outline btn-sm" style="font-size: 0.75rem; padding: 0.3rem 0.6rem;">
+                            Passbook &rarr;
+                        </a>
+                        {% else %}
+                        <a href="{{ url_for('open_account') }}" class="btn btn-primary btn-sm" style="font-size: 0.75rem; padding: 0.3rem 0.6rem;">
+                            + Open
+                        </a>
                         {% endif %}
                     </td>
                 </tr>
                 {% else %}
                 <tr>
-                    <td colspan="10" style="text-align: center; color: #888; padding: 25px;">No customer records found.</td>
+                    <td colspan="8" style="text-align: center; color: var(--text-muted); padding: 3rem;">
+                        <p style="font-weight: 600;">No customer records found.</p>
+                    </td>
                 </tr>
                 {% endfor %}
             </tbody>

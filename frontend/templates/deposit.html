@@ -1,46 +1,100 @@
 {% extends "base.html" %}
 
-{% block title %}Deposit Money - Shreehari Finance{% endblock %}
+{% block title %}Deposit Funds - Shreehari Finance{% endblock %}
 
 {% block content %}
-<div class="section-title">
-    <h2>Deposit Cash into Account</h2>
-    <a href="{{ url_for('passbook') }}" class="btn btn-secondary">View Passbook</a>
+<div class="page-header">
+    <div class="page-title">
+        <h2>Cash Deposit Desk</h2>
+        <p>Instant credit transaction updating the core <code>ACCOUNT</code> ledger in real-time.</p>
+    </div>
+    <div style="display: flex; gap: 0.6rem;">
+        <a href="{{ url_for('passbook') }}" class="btn btn-outline">
+            <span>📜</span> View Passbook
+        </a>
+        <a href="{{ url_for('withdraw') }}" class="btn btn-outline">
+            <span>💸</span> Cash Withdrawal
+        </a>
+    </div>
 </div>
 
-<div class="card" style="max-width: 650px; margin: 0 auto;">
-    <p style="color: #666; margin-bottom: 20px;">
-        Choose the account and enter the deposit amount. This updates the <code>Balance</code> in the <code>ACCOUNT</code> table and records an entry in the <code>TRANSACTION</code> table.
-    </p>
+<div style="max-width: 780px; margin: 0 auto;">
+    
+    <div class="dbms-note-card">
+        <strong><span>⚡</span> DBMS Operation: Single Row Balance Update</strong>
+        Executes atomic <code>UPDATE ACCOUNT SET Balance = Balance + ? WHERE AccountID = ?</code> and records an immutable log entry in <code>TRANSACTION</code>.
+    </div>
 
-    <form method="POST" action="{{ url_for('deposit') }}">
-        <div class="form-group">
-            <label>Select Target Account *</label>
-            <select name="account_id" required>
-                <option value="">-- Choose Account --</option>
-                {% for a in accounts %}
-                <option value="{{ a.AccountID }}">
-                    Account #{{ a.AccountNumber }} ({{ a.OwnerName }}) — Current Balance: ₹{{ "{:,.2f}".format(a.Balance) }}
-                </option>
-                {% endfor %}
-            </select>
+    <div class="panel">
+        <div class="panel-header">
+            <span class="panel-title">
+                <span>💰</span> Credit Cash to Customer Account
+            </span>
+            <span class="badge badge-deposit">Instant Clearance</span>
         </div>
 
-        <div class="form-group">
-            <label>Deposit Amount (₹) *</label>
-            <input type="number" step="0.01" min="1" name="amount" required placeholder="Enter amount to deposit">
-        </div>
+        <div class="panel-body">
+            <form method="POST" action="{{ url_for('deposit') }}">
+                
+                <!-- Account Selector -->
+                <div class="form-field" style="margin-bottom: 1.5rem;">
+                    <label>Select Target Account <span class="required">*</span></label>
+                    <select name="account_id" id="deposit-account-select" required>
+                        <option value="">-- Choose Account to Deposit Into --</option>
+                        {% for a in accounts %}
+                        <option value="{{ a.AccountID }}" data-balance="{{ a.Balance }}" data-owner="{{ a.OwnerName }}" data-accnum="{{ a.AccountNumber }}">
+                            Account #{{ a.AccountNumber }} — {{ a.OwnerName }} ({{ a.AccountType }})
+                        </option>
+                        {% endfor %}
+                    </select>
+                </div>
 
-        <div class="form-group">
-            <label>Description / Remarks</label>
-            <input type="text" name="description" value="Cash Deposit at Branch Counter">
-        </div>
+                <!-- Dynamic Live Balance Preview Box -->
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-bottom: 1.5rem;">
+                    <div class="balance-preview-box">
+                        <div>
+                            <div class="label">Current Balance</div>
+                            <div class="amount" id="deposit-current-bal">₹0.00</div>
+                        </div>
+                        <span style="font-size: 1.5rem; opacity: 0.5;">🏦</span>
+                    </div>
 
-        <div style="margin-top: 15px;">
-            <button type="submit" class="btn btn-success" style="padding: 10px 24px; font-size: 1rem;">
-                + Confirm Deposit
-            </button>
+                    <div class="balance-preview-box highlight-green">
+                        <div>
+                            <div class="label">Projected Balance After Deposit</div>
+                            <div class="amount" id="deposit-projected-bal">₹0.00</div>
+                        </div>
+                        <span style="font-size: 1.5rem; color: #10B981;">📈</span>
+                    </div>
+                </div>
+
+                <!-- Deposit Amount -->
+                <div class="form-field" style="margin-bottom: 1.5rem;">
+                    <label>Deposit Amount (₹) <span class="required">*</span></label>
+                    <input type="number" step="0.01" min="1" name="amount" id="amount-input" required placeholder="Enter deposit amount e.g. 5000" style="font-size: 1.1rem; font-weight: 700; font-family: 'JetBrains Mono', monospace;">
+                    
+                    <div class="quick-amount-chips">
+                        <span class="amount-chip" data-val="500">+ ₹500</span>
+                        <span class="amount-chip" data-val="1000">+ ₹1,000</span>
+                        <span class="amount-chip" data-val="2000">+ ₹2,000</span>
+                        <span class="amount-chip" data-val="5000">+ ₹5,000</span>
+                        <span class="amount-chip" data-val="10000">+ ₹10,000</span>
+                        <span class="amount-chip" data-val="50000">+ ₹50,000</span>
+                    </div>
+                </div>
+
+                <!-- Remarks -->
+                <div class="form-field" style="margin-bottom: 2rem;">
+                    <label>Transaction Remarks / Narration</label>
+                    <input type="text" name="description" value="Cash Deposit at Branch Counter" placeholder="e.g. Counter Cash Deposit">
+                </div>
+
+                <!-- Submit Button -->
+                <button type="submit" class="btn btn-success" style="width: 100%; padding: 0.9rem; font-size: 1rem;">
+                    <span>✓</span> Confirm &amp; Credit Deposit Now
+                </button>
+            </form>
         </div>
-    </form>
+    </div>
 </div>
 {% endblock %}

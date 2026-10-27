@@ -3,53 +3,72 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>{% block title %}Shreehari Finance - Banking System{% endblock %}</title>
+    <title>{% block title %}Shreehari Finance - Banking Management System{% endblock %}</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
 </head>
 <body>
 
     <!-- Header Navigation -->
-    <header>
+    <header class="navbar">
         <div class="nav-container">
-            <div class="logo-area">
-                <h1>SHREEHARI FINANCE</h1>
-                <span>Banking Management System (DBMS Project)</span>
-            </div>
+            <a href="{{ url_for('home') }}" class="brand-wrapper">
+                <div class="brand-icon">🏛️</div>
+                <div class="brand-title">
+                    <h1>SHREEHARI FINANCE</h1>
+                    <span>Core Banking System</span>
+                </div>
+            </a>
+
             <nav>
-                <ul>
-                    <li><a href="{{ url_for('home') }}" class="{% if active_page == 'home' %}active{% endif %}">Home</a></li>
-                    <li><a href="{{ url_for('open_account') }}" class="{% if active_page == 'open_account' %}active{% endif %}">Open Account</a></li>
-                    <li><a href="{{ url_for('deposit') }}" class="{% if active_page == 'deposit' %}active{% endif %}">Deposit</a></li>
-                    <li><a href="{{ url_for('withdraw') }}" class="{% if active_page == 'withdraw' %}active{% endif %}">Withdraw</a></li>
-                    <li><a href="{{ url_for('transfer') }}" class="{% if active_page == 'transfer' %}active{% endif %}">Transfer</a></li>
-                    <li><a href="{{ url_for('passbook') }}" class="{% if active_page == 'passbook' %}active{% endif %}">Passbook</a></li>
-                    <li><a href="{{ url_for('customers') }}" class="{% if active_page == 'customers' %}active{% endif %}">Customers</a></li>
-                    <li><a href="{{ url_for('loans') }}" class="{% if active_page == 'loans' %}active{% endif %}">Loans</a></li>
+                <ul class="nav-menu">
+                    <li class="nav-item"><a href="{{ url_for('home') }}" class="{% if active_page == 'home' %}active{% endif %}">📊 Dashboard</a></li>
+                    <li class="nav-item"><a href="{{ url_for('open_account') }}" class="{% if active_page == 'open_account' %}active{% endif %}">➕ Open Account</a></li>
+                    <li class="nav-item"><a href="{{ url_for('deposit') }}" class="{% if active_page == 'deposit' %}active{% endif %}">📥 Deposit</a></li>
+                    <li class="nav-item"><a href="{{ url_for('withdraw') }}" class="{% if active_page == 'withdraw' %}active{% endif %}">📤 Withdraw</a></li>
+                    <li class="nav-item"><a href="{{ url_for('transfer') }}" class="{% if active_page == 'transfer' %}active{% endif %}">🔄 Transfer</a></li>
+                    <li class="nav-item"><a href="{{ url_for('passbook') }}" class="{% if active_page == 'passbook' %}active{% endif %}">📑 Passbook</a></li>
+                    <li class="nav-item"><a href="{{ url_for('customers') }}" class="{% if active_page == 'customers' %}active{% endif %}">👥 Customers</a></li>
+                    <li class="nav-item"><a href="{{ url_for('loans') }}" class="{% if active_page == 'loans' %}active{% endif %}">💳 Loans</a></li>
                 </ul>
             </nav>
+
+            <div class="db-live-tag">
+                <div class="pulse-dot"></div>
+                <span>MySQL 8.0 Live</span>
+            </div>
         </div>
     </header>
 
     <!-- Main Container -->
-    <div class="container">
+    <main class="main-content">
         <!-- Flash messages for Success or Errors -->
         {% with messages = get_flashed_messages(with_categories=true) %}
             {% if messages %}
                 {% for category, message in messages %}
-                    <div class="alert alert-{{ category }}">
-                        {{ message }}
+                    <div class="alert-banner alert-{{ category }}">
+                        <span>{{ message }}</span>
+                        <button type="button" style="background:none; border:none; cursor:pointer; font-size:1.2rem; color:inherit;" onclick="this.parentElement.remove()">&times;</button>
                     </div>
                 {% endfor %}
             {% endif %}
         {% endwith %}
 
         {% block content %}{% endblock %}
-    </div>
+    </main>
 
-    <!-- Simple Footer -->
+    <!-- Footer -->
     <footer>
-        <p>Shreehari Finance &mdash; Banking Management System | B.Tech CSE (3rd Semester) | MySQL &amp; Flask</p>
+        <div class="footer-inner">
+            <div>
+                <strong>Shreehari Finance</strong> &mdash; 3-Tier Banking Management System
+            </div>
+            <div>
+                Built for DBMS Lab | B.Tech CSE (3rd Semester) | MySQL 8.0 + Flask
+            </div>
+        </div>
     </footer>
 
+    <script src="{{ url_for('static', filename='js/main.js') }}"></script>
+    {% block scripts %}{% endblock %}
 </body>
 </html>
