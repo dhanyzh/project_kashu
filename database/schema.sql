@@ -1,4 +1,4 @@
--- Project Name: Project Kashi (Banking Management System)
+-- Project Name: Shreehari Finance (Banking Management System)
 -- Subject: Database Management Systems Lab (DBMS)
 -- Semester: 3rd Sem B.Tech CSE
 -- Database: MySQL 8.0

@@ -1,7 +1,7 @@
 @echo off
-title PROJECT KASHI - Banking Management System
+title SHREEHARI FINANCE - Banking Management System
 echo ====================================================================
-echo                PROJECT KASHI - BANKING SYSTEM
+echo                SHREEHARI FINANCE - BANKING SYSTEM
 echo       DBMS Course Project (3-Tier: HTML + Flask + MySQL)
 echo ====================================================================
 echo.
@@ -28,7 +28,7 @@ if %errorlevel% neq 0 (
 )
 
 echo.
-echo [3/3] Launching Project Kashi Flask Web Application...
+echo [3/3] Launching Shreehari Finance Flask Web Application...
 echo.
 echo ====================================================================
 echo * Application URL:  http://127.0.0.1:5000

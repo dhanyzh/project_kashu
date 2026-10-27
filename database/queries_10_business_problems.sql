@@ -1,4 +1,4 @@
--- Project Kashi: 10 SQL Business Queries
+-- Shreehari Finance: 10 SQL Business Queries
 -- Course: Database Management Systems Lab (3rd Sem B.Tech CSE)
 -- Database: project_kashi
 

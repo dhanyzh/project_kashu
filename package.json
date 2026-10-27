@@ -1,0 +1,13 @@
+{
+  "name": "shreehari-finance",
+  "version": "1.0.0",
+  "description": "Shreehari Finance - Banking Management System",
+  "scripts": {
+    "start": "python backend/app.py",
+    "dev": "python backend/app.py",
+    "db:setup": "python database/setup_database.py"
+  },
+  "keywords": ["banking", "dbms", "mysql", "flask"],
+  "author": "",
+  "license": "ISC"
+}
