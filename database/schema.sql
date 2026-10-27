@@ -391,21 +391,21 @@ DELIMITER ;
 
 -- Insert Branches
 INSERT INTO BRANCH (BranchName, IFSCCode, Address, City, State, ContactNumber) VALUES
-('Kashi Main Branch', 'KASH0001001', 'Godowlia Chowk, Dashashwamedh', 'Varanasi', 'Uttar Pradesh', '0542-2456781'),
-('Assi Ghat Sub-Branch', 'KASH0001002', 'B-12 Nagwa, Near Assi Ghat', 'Varanasi', 'Uttar Pradesh', '0542-2456782'),
-('Sarnath Branch', 'KASH0001003', 'Museum Road, Sarnath', 'Varanasi', 'Uttar Pradesh', '0542-2456783'),
-('BHU Campus Branch', 'KASH0001004', 'Banaras Hindu University Campus', 'Varanasi', 'Uttar Pradesh', '0542-2456784'),
-('Lucknow Hazratganj', 'KASH0001005', 'MG Road, Hazratganj', 'Lucknow', 'Uttar Pradesh', '0522-2287900');
+('Shreehari Main Branch', 'SHRE0001001', 'Godowlia Chowk, Dashashwamedh', 'Varanasi', 'Uttar Pradesh', '0542-2456781'),
+('Assi Ghat Sub-Branch', 'SHRE0001002', 'B-12 Nagwa, Near Assi Ghat', 'Varanasi', 'Uttar Pradesh', '0542-2456782'),
+('Sarnath Branch', 'SHRE0001003', 'Museum Road, Sarnath', 'Varanasi', 'Uttar Pradesh', '0542-2456783'),
+('BHU Campus Branch', 'SHRE0001004', 'Banaras Hindu University Campus', 'Varanasi', 'Uttar Pradesh', '0542-2456784'),
+('Lucknow Hazratganj', 'SHRE0001005', 'MG Road, Hazratganj', 'Lucknow', 'Uttar Pradesh', '0522-2287900');
 
 -- Insert Employees
 INSERT INTO EMPLOYEE (EmployeeName, Mobile, Email, Designation, Salary, JoiningDate, BranchID) VALUES
-('Amitabh Tripathi', '9876543210', 'amitabh.t@kashibank.in', 'Branch Manager', 85000.00, '2020-01-15', 1),
-('Sunita Sharma', '9876543211', 'sunita.s@kashibank.in', 'Assistant Manager', 62000.00, '2021-03-10', 1),
-('Rahul Verma', '9876543212', 'rahul.v@kashibank.in', 'Cashier', 42000.00, '2022-07-01', 1),
-('Pooja Mishra', '9876543213', 'pooja.m@kashibank.in', 'Loan Officer', 58000.00, '2021-09-15', 2),
-('Vikramaditya Rao', '9876543214', 'vikram.r@kashibank.in', 'Branch Manager', 82000.00, '2019-11-20', 3),
-('Neha Kulkarni', '9876543215', 'neha.k@kashibank.in', 'Clerk', 45000.00, '2023-02-01', 4),
-('Rajesh Pandey', '9876543216', 'rajesh.p@kashibank.in', 'Branch Manager', 90000.00, '2018-05-12', 5);
+('Amitabh Tripathi', '9876543210', 'amitabh.t@shreeharifinance.in', 'Branch Manager', 85000.00, '2020-01-15', 1),
+('Sunita Sharma', '9876543211', 'sunita.s@shreeharifinance.in', 'Assistant Manager', 62000.00, '2021-03-10', 1),
+('Rahul Verma', '9876543212', 'rahul.v@shreeharifinance.in', 'Cashier', 42000.00, '2022-07-01', 1),
+('Pooja Mishra', '9876543213', 'pooja.m@shreeharifinance.in', 'Loan Officer', 58000.00, '2021-09-15', 2),
+('Vikramaditya Rao', '9876543214', 'vikram.r@shreeharifinance.in', 'Branch Manager', 82000.00, '2019-11-20', 3),
+('Neha Kulkarni', '9876543215', 'neha.k@shreeharifinance.in', 'Clerk', 45000.00, '2023-02-01', 4),
+('Rajesh Pandey', '9876543216', 'rajesh.p@shreeharifinance.in', 'Branch Manager', 90000.00, '2018-05-12', 5);
 
 -- Insert Customers
 INSERT INTO CUSTOMER (FirstName, LastName, DateOfBirth, Gender, Mobile, Email, Address, City, RegistrationDate) VALUES
