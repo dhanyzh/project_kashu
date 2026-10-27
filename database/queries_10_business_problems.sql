@@ -4,10 +4,7 @@
 
 USE project_kashi;
 
--- -------------------------------------------------------------
 -- Query 1: Find top 5 customers with the highest total bank balance
--- Concepts used: JOIN, GROUP BY, SUM, ORDER BY DESC, LIMIT
--- -------------------------------------------------------------
 SELECT 
     c.CustomerID,
     CONCAT(c.FirstName, ' ', c.LastName) AS CustomerName,
@@ -23,10 +20,7 @@ GROUP BY c.CustomerID, c.FirstName, c.LastName, c.Mobile, c.City
 ORDER BY TotalBalance DESC
 LIMIT 5;
 
--- -------------------------------------------------------------
 -- Query 2: Compare total customer deposits and total loans given per branch
--- Concepts used: LEFT JOIN, Subqueries in FROM clause, COALESCE
--- -------------------------------------------------------------
 SELECT 
     b.BranchName,
     b.City,
@@ -42,10 +36,7 @@ LEFT JOIN (
 GROUP BY b.BranchID, b.BranchName, b.City, l.TotalLoans
 ORDER BY TotalDeposits DESC;
 
--- -------------------------------------------------------------
 -- Query 3: Find active accounts with no transactions in the last 90 days
--- Concepts used: LEFT JOIN, HAVING, DATE_SUB, NULL checking
--- -------------------------------------------------------------
 SELECT 
     a.AccountID,
     a.AccountNumber,
@@ -61,10 +52,7 @@ WHERE a.Status = 'Active'
 GROUP BY a.AccountID, a.AccountNumber, a.AccountType, a.Balance, c.FirstName, c.LastName
 HAVING LastTxnDate IS NULL OR LastTxnDate < DATE_SUB(NOW(), INTERVAL 90 DAY);
 
--- -------------------------------------------------------------
 -- Query 4: Find customers who have both a Savings Account and a Loan
--- Concepts used: Subquery with IN, DISTINCT
--- -------------------------------------------------------------
 SELECT DISTINCT 
     c.CustomerID,
     CONCAT(c.FirstName, ' ', c.LastName) AS CustomerName,
@@ -80,10 +68,7 @@ WHERE c.CustomerID IN (
     WHERE a.AccountType = 'Saving'
 );
 
--- -------------------------------------------------------------
 -- Query 5: Find all high value transactions (amount >= 20,000) for audit
--- Concepts used: Multi-table JOIN, WHERE clause filter, ORDER BY
--- -------------------------------------------------------------
 SELECT 
     t.TransactionID,
     t.ReferenceNumber,
@@ -99,10 +84,7 @@ JOIN CUSTOMER c ON ah.CustomerID = c.CustomerID
 WHERE t.Amount >= 20000
 ORDER BY t.Amount DESC;
 
--- -------------------------------------------------------------
 -- Query 6: Find total employees and average employee salary per branch
--- Concepts used: GROUP BY, COUNT, AVG, ROUND
--- -------------------------------------------------------------
 SELECT 
     b.BranchName,
     COUNT(e.EmployeeID) AS TotalEmployees,
@@ -111,10 +93,7 @@ FROM BRANCH b
 LEFT JOIN EMPLOYEE e ON b.BranchID = e.BranchID
 GROUP BY b.BranchID, b.BranchName;
 
--- -------------------------------------------------------------
 -- Query 7: Track loan repayments and find remaining loan balance
--- Concepts used: LEFT JOIN, Aggregation SUM, Subtraction, COALESCE
--- -------------------------------------------------------------
 SELECT 
     l.LoanID,
     CONCAT(c.FirstName, ' ', c.LastName) AS Borrower,
@@ -128,10 +107,7 @@ JOIN CUSTOMER c ON l.CustomerID = c.CustomerID
 LEFT JOIN LOAN_PAYMENT lp ON l.LoanID = lp.LoanID
 GROUP BY l.LoanID, c.FirstName, c.LastName, l.LoanType, l.LoanAmount, l.LoanStatus;
 
--- -------------------------------------------------------------
 -- Query 8: Find customers who hold more than one bank account
--- Concepts used: GROUP BY, HAVING COUNT > 1
--- -------------------------------------------------------------
 SELECT 
     c.CustomerID,
     CONCAT(c.FirstName, ' ', c.LastName) AS CustomerName,
@@ -143,10 +119,7 @@ JOIN ACCOUNT a ON ah.AccountID = a.AccountID
 GROUP BY c.CustomerID, c.FirstName, c.LastName
 HAVING COUNT(ah.AccountID) > 1;
 
--- -------------------------------------------------------------
 -- Query 9: Calculate total transactions and sum of money by transaction type
--- Concepts used: GROUP BY TransactionType, COUNT, SUM, AVG
--- -------------------------------------------------------------
 SELECT 
     TransactionType,
     COUNT(*) AS TotalCount,
@@ -156,10 +129,7 @@ FROM TRANSACTION
 GROUP BY TransactionType
 ORDER BY TotalAmount DESC;
 
--- -------------------------------------------------------------
 -- Query 10: Find total customers and deposits grouped by city
--- Concepts used: GROUP BY City, COUNT DISTINCT, SUM
--- -------------------------------------------------------------
 SELECT 
     c.City,
     COUNT(DISTINCT c.CustomerID) AS CustomerCount,

@@ -7,10 +7,7 @@ DROP DATABASE IF EXISTS project_kashi;
 CREATE DATABASE project_kashi;
 USE project_kashi;
 
--- -------------------------------------------------------------
--- Table 1: BRANCH
--- Creating branch table first because account and employee reference it
--- -------------------------------------------------------------
+-- Branch table (created first because account and employee reference branch id)
 CREATE TABLE BRANCH (
     BranchID INT AUTO_INCREMENT PRIMARY KEY,
     BranchName VARCHAR(100) NOT NULL,
@@ -22,10 +19,7 @@ CREATE TABLE BRANCH (
     CreatedAt DATETIME DEFAULT CURRENT_TIMESTAMP
 );
 
--- -------------------------------------------------------------
--- Table 2: CUSTOMER
--- Stores customer personal details and contact info
--- -------------------------------------------------------------
+-- Customer table to store personal details
 CREATE TABLE CUSTOMER (
     CustomerID INT AUTO_INCREMENT PRIMARY KEY,
     FirstName VARCHAR(50) NOT NULL,
@@ -39,10 +33,7 @@ CREATE TABLE CUSTOMER (
     RegistrationDate DATETIME DEFAULT CURRENT_TIMESTAMP
 );
 
--- -------------------------------------------------------------
--- Table 3: EMPLOYEE
--- Stores bank employees working in different branches
--- -------------------------------------------------------------
+-- Employee table with branch reference
 CREATE TABLE EMPLOYEE (
     EmployeeID INT AUTO_INCREMENT PRIMARY KEY,
     EmployeeName VARCHAR(100) NOT NULL,
@@ -55,10 +46,7 @@ CREATE TABLE EMPLOYEE (
     FOREIGN KEY (BranchID) REFERENCES BRANCH(BranchID)
 );
 
--- -------------------------------------------------------------
--- Table 4: ACCOUNT
--- Stores account number, type (Saving/Current/Salary), and balance
--- -------------------------------------------------------------
+-- Account table (Saving, Current, Salary accounts)
 CREATE TABLE ACCOUNT (
     AccountID INT AUTO_INCREMENT PRIMARY KEY,
     AccountNumber VARCHAR(20) NOT NULL UNIQUE,
@@ -70,11 +58,7 @@ CREATE TABLE ACCOUNT (
     FOREIGN KEY (BranchID) REFERENCES BRANCH(BranchID)
 );
 
--- -------------------------------------------------------------
--- Table 5: ACCOUNT_HOLDER
--- Junction table for Many-to-Many relation between Customer and Account
--- Handles single and joint accounts
--- -------------------------------------------------------------
+-- Junction table for Many-to-Many connection between Customer and Account
 CREATE TABLE ACCOUNT_HOLDER (
     CustomerID INT NOT NULL,
     AccountID INT NOT NULL,
@@ -85,10 +69,7 @@ CREATE TABLE ACCOUNT_HOLDER (
     FOREIGN KEY (AccountID) REFERENCES ACCOUNT(AccountID) ON DELETE CASCADE
 );
 
--- -------------------------------------------------------------
--- Table 6: TRANSACTION
--- Stores deposit, withdrawal, and transfer records
--- -------------------------------------------------------------
+-- Transaction table for deposit, withdrawal, and transfer records
 CREATE TABLE TRANSACTION (
     TransactionID INT AUTO_INCREMENT PRIMARY KEY,
     AccountID INT NOT NULL,
@@ -101,10 +82,7 @@ CREATE TABLE TRANSACTION (
     FOREIGN KEY (AccountID) REFERENCES ACCOUNT(AccountID)
 );
 
--- -------------------------------------------------------------
--- Table 7: LOAN
--- Stores loans taken by customers from branches
--- -------------------------------------------------------------
+-- Loan table
 CREATE TABLE LOAN (
     LoanID INT AUTO_INCREMENT PRIMARY KEY,
     CustomerID INT NOT NULL,
@@ -120,10 +98,7 @@ CREATE TABLE LOAN (
     FOREIGN KEY (BranchID) REFERENCES BRANCH(BranchID)
 );
 
--- -------------------------------------------------------------
--- Table 8: LOAN_PAYMENT
--- Stores repayments made against loans
--- -------------------------------------------------------------
+-- Loan Payment table
 CREATE TABLE LOAN_PAYMENT (
     PaymentID INT AUTO_INCREMENT PRIMARY KEY,
     LoanID INT NOT NULL,
@@ -133,10 +108,6 @@ CREATE TABLE LOAN_PAYMENT (
     ReferenceNumber VARCHAR(50) NOT NULL UNIQUE,
     FOREIGN KEY (LoanID) REFERENCES LOAN(LoanID)
 );
-
--- -------------------------------------------------------------
--- Views for easy reporting
--- -------------------------------------------------------------
 
 -- View 1: Customer and their account details with branch IFSC
 CREATE OR REPLACE VIEW vw_customer_accounts AS
@@ -197,9 +168,6 @@ LEFT JOIN LOAN l ON b.BranchID = l.BranchID
 LEFT JOIN EMPLOYEE e ON b.BranchID = e.BranchID
 GROUP BY b.BranchID, b.BranchName, b.City, b.IFSCCode;
 
--- -------------------------------------------------------------
--- Stored Functions
--- -------------------------------------------------------------
 DELIMITER $$
 
 -- Function to calculate total balance of a customer across all their accounts
@@ -232,10 +200,6 @@ BEGIN
     SET emi = (p_amount * r * POW(1 + r, p_tenure_months)) / (POW(1 + r, p_tenure_months) - 1);
     RETURN ROUND(emi, 2);
 END$$
-
--- -------------------------------------------------------------
--- Stored Procedures
--- -------------------------------------------------------------
 
 -- Procedure for money transfer with transaction rollback and commit
 CREATE PROCEDURE sp_transfer_funds(
@@ -393,10 +357,6 @@ BEGIN
     END IF;
 END$$
 
--- -------------------------------------------------------------
--- Triggers
--- -------------------------------------------------------------
-
 -- Trigger 1: Don't allow balance to become negative
 CREATE TRIGGER trg_prevent_negative_balance
 BEFORE UPDATE ON ACCOUNT
@@ -428,10 +388,6 @@ BEGIN
 END$$
 
 DELIMITER ;
-
--- -------------------------------------------------------------
--- Inserting Sample Data for Testing
--- -------------------------------------------------------------
 
 -- Insert Branches
 INSERT INTO BRANCH (BranchName, IFSCCode, Address, City, State, ContactNumber) VALUES
