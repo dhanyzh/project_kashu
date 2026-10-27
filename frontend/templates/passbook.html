@@ -1,0 +1,72 @@
+{% extends "base.html" %}
+
+{% block title %}Passbook - Project Kashi{% endblock %}
+
+{% block content %}
+<div class="section-title">
+    <h2>Transaction Passbook Ledger</h2>
+    <div style="display: flex; gap: 8px;">
+        <a href="{{ url_for('deposit') }}" class="btn btn-success">+ Deposit</a>
+        <a href="{{ url_for('withdraw') }}" class="btn btn-danger">- Withdraw</a>
+        <a href="{{ url_for('transfer') }}" class="btn btn-primary">Transfer</a>
+    </div>
+</div>
+
+<!-- Search / Filter Card -->
+<div class="card" style="padding: 15px; margin-bottom: 20px;">
+    <form method="GET" action="{{ url_for('passbook') }}" style="display: flex; gap: 10px; align-items: center; flex-wrap: wrap;">
+        <label style="margin: 0;">Filter by Account Number:</label>
+        <input type="text" name="account_number" placeholder="e.g. 1001002001" value="{{ filter_acc }}" style="width: 220px;">
+        <button type="submit" class="btn btn-primary">Search</button>
+        {% if filter_acc %}
+        <a href="{{ url_for('passbook') }}" class="btn btn-secondary">Clear Filter</a>
+        {% endif %}
+    </form>
+</div>
+
+<!-- Passbook Table -->
+<div class="card">
+    <div class="table-responsive">
+        <table>
+            <thead>
+                <tr>
+                    <th>Txn ID</th>
+                    <th>Date &amp; Time</th>
+                    <th>Ref Number</th>
+                    <th>Account No</th>
+                    <th>Customer Name</th>
+                    <th>Type</th>
+                    <th>Amount (₹)</th>
+                    <th>Description</th>
+                    <th>Status</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for t in txns %}
+                <tr>
+                    <td>#{{ t.TransactionID }}</td>
+                    <td>{{ t.TransactionDate.strftime('%d-%b-%Y %H:%M') if t.TransactionDate else '-' }}</td>
+                    <td><code>{{ t.ReferenceNumber }}</code></td>
+                    <td><strong>{{ t.AccountNumber }}</strong></td>
+                    <td>{{ t.CustomerName }}</td>
+                    <td>
+                        <span class="badge badge-{{ t.TransactionType|lower }}">
+                            {{ t.TransactionType }}
+                        </span>
+                    </td>
+                    <td style="font-weight: bold; color: {% if t.TransactionType in ['DEPOSIT', 'TRANSFER_IN'] %}#28a745{% else %}#dc3545{% endif %};">
+                        {% if t.TransactionType in ['DEPOSIT', 'TRANSFER_IN'] %}+{% else %}-{% endif %}₹{{ "{:,.2f}".format(t.Amount) }}
+                    </td>
+                    <td>{{ t.Description or '-' }}</td>
+                    <td><span class="badge badge-active">{{ t.TransactionStatus }}</span></td>
+                </tr>
+                {% else %}
+                <tr>
+                    <td colspan="9" style="text-align: center; color: #888; padding: 25px;">No transactions recorded.</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+{% endblock %}

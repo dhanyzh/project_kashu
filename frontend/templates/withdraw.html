@@ -1,0 +1,46 @@
+{% extends "base.html" %}
+
+{% block title %}Withdraw Money - Project Kashi{% endblock %}
+
+{% block content %}
+<div class="section-title">
+    <h2>Withdraw Cash from Account</h2>
+    <a href="{{ url_for('passbook') }}" class="btn btn-secondary">View Passbook</a>
+</div>
+
+<div class="card" style="max-width: 650px; margin: 0 auto;">
+    <p style="color: #666; margin-bottom: 20px;">
+        Choose the account and enter withdrawal amount. The database checks if sufficient balance exists and updates the account balance.
+    </p>
+
+    <form method="POST" action="{{ url_for('withdraw') }}">
+        <div class="form-group">
+            <label>Select Account *</label>
+            <select name="account_id" required>
+                <option value="">-- Choose Account --</option>
+                {% for a in accounts %}
+                <option value="{{ a.AccountID }}">
+                    Account #{{ a.AccountNumber }} ({{ a.OwnerName }}) — Available: ₹{{ "{:,.2f}".format(a.Balance) }}
+                </option>
+                {% endfor %}
+            </select>
+        </div>
+
+        <div class="form-group">
+            <label>Withdrawal Amount (₹) *</label>
+            <input type="number" step="0.01" min="1" name="amount" required placeholder="Enter amount to withdraw">
+        </div>
+
+        <div class="form-group">
+            <label>Description / Terminal Remarks</label>
+            <input type="text" name="description" value="ATM / Branch Cash Withdrawal">
+        </div>
+
+        <div style="margin-top: 15px;">
+            <button type="submit" class="btn btn-danger" style="padding: 10px 24px; font-size: 1rem;">
+                - Confirm Withdrawal
+            </button>
+        </div>
+    </form>
+</div>
+{% endblock %}

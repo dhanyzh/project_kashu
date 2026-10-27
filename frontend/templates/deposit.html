@@ -1,0 +1,46 @@
+{% extends "base.html" %}
+
+{% block title %}Deposit Money - Project Kashi{% endblock %}
+
+{% block content %}
+<div class="section-title">
+    <h2>Deposit Cash into Account</h2>
+    <a href="{{ url_for('passbook') }}" class="btn btn-secondary">View Passbook</a>
+</div>
+
+<div class="card" style="max-width: 650px; margin: 0 auto;">
+    <p style="color: #666; margin-bottom: 20px;">
+        Choose the account and enter the deposit amount. This updates the <code>Balance</code> in the <code>ACCOUNT</code> table and records an entry in the <code>TRANSACTION</code> table.
+    </p>
+
+    <form method="POST" action="{{ url_for('deposit') }}">
+        <div class="form-group">
+            <label>Select Target Account *</label>
+            <select name="account_id" required>
+                <option value="">-- Choose Account --</option>
+                {% for a in accounts %}
+                <option value="{{ a.AccountID }}">
+                    Account #{{ a.AccountNumber }} ({{ a.OwnerName }}) — Current Balance: ₹{{ "{:,.2f}".format(a.Balance) }}
+                </option>
+                {% endfor %}
+            </select>
+        </div>
+
+        <div class="form-group">
+            <label>Deposit Amount (₹) *</label>
+            <input type="number" step="0.01" min="1" name="amount" required placeholder="Enter amount to deposit">
+        </div>
+
+        <div class="form-group">
+            <label>Description / Remarks</label>
+            <input type="text" name="description" value="Cash Deposit at Branch Counter">
+        </div>
+
+        <div style="margin-top: 15px;">
+            <button type="submit" class="btn btn-success" style="padding: 10px 24px; font-size: 1rem;">
+                + Confirm Deposit
+            </button>
+        </div>
+    </form>
+</div>
+{% endblock %}

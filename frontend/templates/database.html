@@ -1,0 +1,112 @@
+{% extends "base.html" %}
+
+{% block title %}Database Schema - Project Kashi{% endblock %}
+
+{% block content %}
+<div class="section-title">
+    <h2>Database Schema &amp; ER Model</h2>
+</div>
+
+<!-- 8 Tables Summary Card -->
+<div class="card">
+    <h3 style="color: #0b3954; margin-bottom: 15px;">The 8 Database Tables (Relational Model)</h3>
+    <div class="table-responsive">
+        <table>
+            <thead>
+                <tr>
+                    <th>Table Name</th>
+                    <th>Primary Key</th>
+                    <th>Foreign Keys</th>
+                    <th>Key Attributes &amp; Purpose</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td><strong>1. BRANCH</strong></td>
+                    <td><code>BranchID</code></td>
+                    <td>None</td>
+                    <td>BranchName, IFSCCode (Unique), City, State, ContactNumber</td>
+                </tr>
+                <tr>
+                    <td><strong>2. CUSTOMER</strong></td>
+                    <td><code>CustomerID</code></td>
+                    <td>None</td>
+                    <td>FirstName, LastName, DateOfBirth, Gender, Mobile (Unique), Email (Unique), Address, City</td>
+                </tr>
+                <tr>
+                    <td><strong>3. EMPLOYEE</strong></td>
+                    <td><code>EmployeeID</code></td>
+                    <td><code>BranchID &rarr; BRANCH</code></td>
+                    <td>EmployeeName, Mobile, Designation, Salary (Check > 0), JoiningDate</td>
+                </tr>
+                <tr>
+                    <td><strong>4. ACCOUNT</strong></td>
+                    <td><code>AccountID</code></td>
+                    <td><code>BranchID &rarr; BRANCH</code></td>
+                    <td>AccountNumber (Unique), AccountType (Saving/Current/Salary), Balance (Check >= 0), Status</td>
+                </tr>
+                <tr>
+                    <td><strong>5. ACCOUNT_HOLDER</strong></td>
+                    <td><code>(CustomerID, AccountID)</code></td>
+                    <td><code>CustomerID &rarr; CUSTOMER</code><br><code>AccountID &rarr; ACCOUNT</code></td>
+                    <td>Many-to-Many bridge table connecting customers with their bank accounts. HolderSince, HolderType.</td>
+                </tr>
+                <tr>
+                    <td><strong>6. TRANSACTION</strong></td>
+                    <td><code>TransactionID</code></td>
+                    <td><code>AccountID &rarr; ACCOUNT</code></td>
+                    <td>TransactionType (DEPOSIT, WITHDRAWAL, TRANSFER_IN, TRANSFER_OUT), Amount, ReferenceNumber, Description</td>
+                </tr>
+                <tr>
+                    <td><strong>7. LOAN</strong></td>
+                    <td><code>LoanID</code></td>
+                    <td><code>CustomerID &rarr; CUSTOMER</code><br><code>BranchID &rarr; BRANCH</code></td>
+                    <td>LoanType, LoanAmount, InterestRate, StartDate, TenureMonths, LoanStatus</td>
+                </tr>
+                <tr>
+                    <td><strong>8. LOAN_PAYMENT</strong></td>
+                    <td><code>PaymentID</code></td>
+                    <td><code>LoanID &rarr; LOAN</code></td>
+                    <td>PaymentDate, Amount, PaymentMode, ReferenceNumber</td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+</div>
+
+<!-- ER Diagram Card (Simple text/box diagram) -->
+<div class="card">
+    <h3 style="color: #0b3954; margin-bottom: 12px;">Entity-Relationship (ER) Connections</h3>
+    <pre class="code" style="color: #ffffff; background: #1a252f; line-height: 1.8;">
+ [BRANCH] (1) ─────────────< (M) [EMPLOYEE]      (One branch has many employees)
+ [BRANCH] (1) ─────────────< (M) [ACCOUNT]       (One branch maintains many accounts)
+ [BRANCH] (1) ─────────────< (M) [LOAN]          (One branch sanctions many loans)
+
+ [CUSTOMER] (M) ──< [ACCOUNT_HOLDER] >── (M) [ACCOUNT]  (Many-to-Many resolved by bridge)
+ [ACCOUNT]  (1) ─────────────< (M) [TRANSACTION]        (One account has many transactions)
+
+ [CUSTOMER] (1) ─────────────< (M) [LOAN]               (One customer can take many loans)
+ [LOAN]     (1) ─────────────< (M) [LOAN_PAYMENT]       (One loan has many repayment installments)
+    </pre>
+</div>
+
+<!-- Stored Procedures, Functions, & Triggers -->
+<div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 15px;">
+    <div class="card" style="margin-bottom: 0;">
+        <h4 style="color: #0b3954; margin-bottom: 10px;">Stored Procedures</h4>
+        <ul style="padding-left: 20px; font-size: 0.9rem; line-height: 1.8;">
+            <li><code>sp_transfer_funds</code>: Performs atomic transfer between 2 accounts with <code>START TRANSACTION</code> and <code>COMMIT</code>.</li>
+            <li><code>sp_deposit_money</code>: Credits balance and inserts transaction.</li>
+            <li><code>sp_withdraw_money</code>: Checks balance, debits, and logs transaction.</li>
+        </ul>
+    </div>
+
+    <div class="card" style="margin-bottom: 0;">
+        <h4 style="color: #0b3954; margin-bottom: 10px;">Triggers</h4>
+        <ul style="padding-left: 20px; font-size: 0.9rem; line-height: 1.8;">
+            <li><code>trg_prevent_negative_balance</code>: Blocks any account balance from falling below ₹0.00.</li>
+            <li><code>trg_check_loan_completion</code>: Automatically closes loan when repayments &ge; principal.</li>
+        </ul>
+    </div>
+</div>
+{% endblock %}

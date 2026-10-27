@@ -1,0 +1,61 @@
+{% extends "base.html" %}
+
+{% block title %}Transfer Funds - Project Kashi{% endblock %}
+
+{% block content %}
+<div class="section-title">
+    <h2>Inter-Account Money Transfer</h2>
+    <a href="{{ url_for('passbook') }}" class="btn btn-secondary">View Passbook</a>
+</div>
+
+<div class="card" style="max-width: 650px; margin: 0 auto;">
+    <div style="background: #eaf5fc; padding: 12px; border-radius: 4px; border-left: 4px solid #087e8b; margin-bottom: 20px;">
+        <strong>DBMS Concept (ACID Transaction):</strong>
+        <p style="font-size: 0.85rem; margin-top: 4px; color: #333;">
+            This uses Stored Procedure <code>sp_transfer_funds</code> with <code>START TRANSACTION</code>. If sender has enough balance, money is subtracted from sender and added to receiver, then committed. Otherwise, <code>ROLLBACK</code> is executed so no money is lost!
+        </p>
+    </div>
+
+    <form method="POST" action="{{ url_for('transfer') }}">
+        <div class="form-group">
+            <label>1. From Sender Account (Debited) *</label>
+            <select name="sender_id" required>
+                <option value="">-- Select Debited Account --</option>
+                {% for a in accounts %}
+                <option value="{{ a.AccountID }}">
+                    Account #{{ a.AccountNumber }} ({{ a.OwnerName }}) — Avail: ₹{{ "{:,.2f}".format(a.Balance) }}
+                </option>
+                {% endfor %}
+            </select>
+        </div>
+
+        <div class="form-group">
+            <label>2. To Receiver Account (Credited) *</label>
+            <select name="receiver_id" required>
+                <option value="">-- Select Credited Account --</option>
+                {% for a in accounts %}
+                <option value="{{ a.AccountID }}">
+                    Account #{{ a.AccountNumber }} ({{ a.OwnerName }})
+                </option>
+                {% endfor %}
+            </select>
+        </div>
+
+        <div class="form-group">
+            <label>3. Transfer Amount (₹) *</label>
+            <input type="number" step="0.01" min="1" name="amount" required placeholder="Enter amount to transfer">
+        </div>
+
+        <div class="form-group">
+            <label>4. Remarks</label>
+            <input type="text" name="description" value="Online Inter-Account Fund Transfer">
+        </div>
+
+        <div style="margin-top: 20px;">
+            <button type="submit" class="btn btn-primary" style="padding: 10px 24px; font-size: 1rem;" onclick="return confirm('Do you want to confirm this money transfer?');">
+                Execute Transfer &rarr;
+            </button>
+        </div>
+    </form>
+</div>
+{% endblock %}

@@ -3,68 +3,55 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>{% block title %}Project Kashi - Banking Management System{% endblock %}</title>
+    <title>{% block title %}Project Kashi - Banking System{% endblock %}</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
-    <!-- Mermaid.js for live ER Diagrams -->
-    <script src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>
-    <script>mermaid.initialize({ startOnLoad: true, theme: 'neutral' });</script>
 </head>
 <body>
 
-    <!-- Main Navigation Bar -->
-    <nav class="navbar">
+    <!-- Header Navigation -->
+    <header>
         <div class="nav-container">
-            <a href="{{ url_for('dashboard') }}" class="brand-logo">
-                <div class="logo-icon">🏛️</div>
-                <div class="brand-text">
-                    <h1>PROJECT KASHI</h1>
-                    <span>Banking Management System</span>
-                </div>
-            </a>
-
-            <ul class="nav-links">
-                <li><a href="{{ url_for('dashboard') }}" class="nav-link {% if active_page == 'dashboard' %}active{% endif %}">📊 Dashboard</a></li>
-                <li><a href="{{ url_for('customers_list') }}" class="nav-link {% if active_page == 'customers' %}active{% endif %}">👥 Customers</a></li>
-                <li><a href="{{ url_for('accounts_list') }}" class="nav-link {% if active_page == 'accounts' %}active{% endif %}">💳 Accounts</a></li>
-                <li><a href="{{ url_for('transactions_list') }}" class="nav-link {% if active_page == 'transactions' %}active{% endif %}">💸 Operations</a></li>
-                <li><a href="{{ url_for('loans_list') }}" class="nav-link {% if active_page == 'loans' %}active{% endif %}">📑 Loans</a></li>
-                <li><a href="{{ url_for('branches_list') }}" class="nav-link {% if active_page == 'branches' %}active{% endif %}">🏢 Branches</a></li>
-                <li><a href="{{ url_for('analytics') }}" class="nav-link {% if active_page == 'analytics' %}active{% endif %}">🧠 SQL 10 Problems <span class="nav-badge-pill">Core</span></a></li>
-                <li><a href="{{ url_for('schema_view') }}" class="nav-link {% if active_page == 'schema' %}active{% endif %}">🗄️ Schema</a></li>
-            </ul>
+            <div class="logo-area">
+                <h1>PROJECT KASHI</h1>
+                <span>Banking Management System (DBMS Project)</span>
+            </div>
+            <nav>
+                <ul>
+                    <li><a href="{{ url_for('home') }}" class="{% if active_page == 'home' %}active{% endif %}">Home</a></li>
+                    <li><a href="{{ url_for('open_account') }}" class="{% if active_page == 'open_account' %}active{% endif %}">Open Account</a></li>
+                    <li><a href="{{ url_for('deposit') }}" class="{% if active_page == 'deposit' %}active{% endif %}">Deposit</a></li>
+                    <li><a href="{{ url_for('withdraw') }}" class="{% if active_page == 'withdraw' %}active{% endif %}">Withdraw</a></li>
+                    <li><a href="{{ url_for('transfer') }}" class="{% if active_page == 'transfer' %}active{% endif %}">Transfer</a></li>
+                    <li><a href="{{ url_for('passbook') }}" class="{% if active_page == 'passbook' %}active{% endif %}">Passbook</a></li>
+                    <li><a href="{{ url_for('customers') }}" class="{% if active_page == 'customers' %}active{% endif %}">Customers</a></li>
+                    <li><a href="{{ url_for('loans') }}" class="{% if active_page == 'loans' %}active{% endif %}">Loans</a></li>
+                    <li><a href="{{ url_for('queries') }}" class="{% if active_page == 'queries' %}active{% endif %}">10 Queries</a></li>
+                    <li><a href="{{ url_for('database') }}" class="{% if active_page == 'database' %}active{% endif %}">Database</a></li>
+                </ul>
+            </nav>
         </div>
-    </nav>
+    </header>
 
-    <!-- Main Body Container -->
-    <main class="main-wrapper">
-        <!-- Flash Messages -->
+    <!-- Main Container -->
+    <div class="container">
+        <!-- Flash messages for Success or Errors -->
         {% with messages = get_flashed_messages(with_categories=true) %}
             {% if messages %}
                 {% for category, message in messages %}
                     <div class="alert alert-{{ category }}">
-                        <span>{{ message }}</span>
-                        <button type="button" class="modal-close" onclick="this.parentElement.remove()">&times;</button>
+                        {{ message }}
                     </div>
                 {% endfor %}
             {% endif %}
         {% endwith %}
 
         {% block content %}{% endblock %}
-    </main>
+    </div>
 
-    <!-- Global Footer -->
+    <!-- Simple Footer -->
     <footer>
-        <div class="footer-content">
-            <div>
-                <strong>Project Kashi — Banking Management System</strong> | 3-Tier DBMS Project (HTML + Flask + MySQL 8.0)
-            </div>
-            <div>
-                Developed for B.Tech CSE (3rd Semester) | Class Internal Submission
-            </div>
-        </div>
+        <p>Project Kashi &mdash; Banking Management System | B.Tech CSE (3rd Semester) | MySQL &amp; Flask</p>
     </footer>
 
-    <script src="{{ url_for('static', filename='js/main.js') }}"></script>
-    {% block scripts %}{% endblock %}
 </body>
 </html>
