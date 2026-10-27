@@ -391,11 +391,11 @@ DELIMITER ;
 
 -- Insert Branches
 INSERT INTO BRANCH (BranchName, IFSCCode, Address, City, State, ContactNumber) VALUES
-('Shreehari Main Branch', 'SHRE0001001', 'Godowlia Chowk, Dashashwamedh', 'Varanasi', 'Uttar Pradesh', '0542-2456781'),
-('Assi Ghat Sub-Branch', 'SHRE0001002', 'B-12 Nagwa, Near Assi Ghat', 'Varanasi', 'Uttar Pradesh', '0542-2456782'),
-('Sarnath Branch', 'SHRE0001003', 'Museum Road, Sarnath', 'Varanasi', 'Uttar Pradesh', '0542-2456783'),
-('BHU Campus Branch', 'SHRE0001004', 'Banaras Hindu University Campus', 'Varanasi', 'Uttar Pradesh', '0542-2456784'),
-('Lucknow Hazratganj', 'SHRE0001005', 'MG Road, Hazratganj', 'Lucknow', 'Uttar Pradesh', '0522-2287900');
+('Shreehari Branch 1', 'SHRE0001001', 'Godowlia Chowk, Dashashwamedh', 'Varanasi', 'Uttar Pradesh', '0542-2456781'),
+('Shreehari Branch 2', 'SHRE0001002', 'B-12 Nagwa, Near Assi Ghat', 'Varanasi', 'Uttar Pradesh', '0542-2456782'),
+('Shreehari Branch 3', 'SHRE0001003', 'Museum Road, Sarnath', 'Varanasi', 'Uttar Pradesh', '0542-2456783'),
+('Shreehari Branch 4', 'SHRE0001004', 'Banaras Hindu University Campus', 'Varanasi', 'Uttar Pradesh', '0542-2456784'),
+('Shreehari Branch 5', 'SHRE0001005', 'MG Road, Hazratganj', 'Lucknow', 'Uttar Pradesh', '0522-2287900');
 
 -- Insert Employees
 INSERT INTO EMPLOYEE (EmployeeName, Mobile, Email, Designation, Salary, JoiningDate, BranchID) VALUES
