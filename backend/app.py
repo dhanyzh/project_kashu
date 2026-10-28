@@ -255,21 +255,53 @@ def transfer():
             flash("Transfer amount must be greater than zero.", "danger")
             return redirect(url_for("transfer"))
 
-        # Execute using Stored Procedure sp_transfer_funds (Atomic ACID Transaction)
+        # Execute transfer using ACID Transaction with row locks
         conn = get_connection()
         try:
             with conn.cursor() as cursor:
-                cursor.execute("CALL sp_transfer_funds(%s, %s, %s, %s, @status_code, @status_msg);",
-                               (sender_id, receiver_id, amount, desc))
-                cursor.execute("SELECT @status_code AS code, @status_msg AS msg;")
-                res = cursor.fetchone()
+                # Check sender balance with row lock
+                cursor.execute("SELECT Balance, Status FROM ACCOUNT WHERE AccountID = %s FOR UPDATE;", (sender_id,))
+                sender_acc = cursor.fetchone()
+                cursor.execute("SELECT Status FROM ACCOUNT WHERE AccountID = %s FOR UPDATE;", (receiver_id,))
+                receiver_acc = cursor.fetchone()
 
-                if res and res['code'] == 200:
-                    flash(f"Transfer of ₹{amount:,.2f} completed successfully! (ACID Transaction Committed)", "success")
-                    return redirect(url_for("passbook"))
-                else:
-                    flash(f"Transfer failed: {res['msg'] if res else 'Unknown error'}", "danger")
+                if not sender_acc or not receiver_acc:
+                    flash("One or both accounts not found.", "danger")
+                    conn.rollback()
+                    return redirect(url_for("transfer"))
+
+                if sender_acc.get('Status') != 'Active' or receiver_acc.get('Status') != 'Active':
+                    flash("Both accounts must be Active to complete transfer.", "danger")
+                    conn.rollback()
+                    return redirect(url_for("transfer"))
+
+                if float(sender_acc.get('Balance', 0)) < amount:
+                    flash("Insufficient balance in sender account.", "danger")
+                    conn.rollback()
+                    return redirect(url_for("transfer"))
+
+                # Debit sender and credit receiver
+                cursor.execute("UPDATE ACCOUNT SET Balance = Balance - %s WHERE AccountID = %s;", (amount, sender_id))
+                cursor.execute("UPDATE ACCOUNT SET Balance = Balance + %s WHERE AccountID = %s;", (amount, receiver_id))
+
+                ref_out = get_ref_number("TXN-OUT")
+                ref_in = get_ref_number("TXN-IN")
+
+                cursor.execute("""
+                    INSERT INTO `TRANSACTION` (AccountID, TransactionType, Amount, Description, ReferenceNumber, TransactionStatus)
+                    VALUES (%s, 'TRANSFER_OUT', %s, %s, %s, 'Success');
+                """, (sender_id, amount, desc, ref_out))
+
+                cursor.execute("""
+                    INSERT INTO `TRANSACTION` (AccountID, TransactionType, Amount, Description, ReferenceNumber, TransactionStatus)
+                    VALUES (%s, 'TRANSFER_IN', %s, %s, %s, 'Success');
+                """, (receiver_id, amount, desc, ref_in))
+
+                conn.commit()
+                flash(f"Transfer of ₹{amount:,.2f} completed successfully! (ACID Transaction Committed)", "success")
+                return redirect(url_for("passbook"))
         except Exception as e:
+            conn.rollback()
             flash(f"Error during transfer: {str(e)}", "danger")
         finally:
             conn.close()

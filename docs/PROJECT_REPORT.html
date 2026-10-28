@@ -1,0 +1,520 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>PROJECT KASHI - DBMS Lab Project Report</title>
+<style>
+  @page {
+    size: A4;
+    margin: 18mm 16mm 18mm 16mm;
+    @bottom-right {
+      content: counter(page);
+    }
+  }
+  body {
+    font-family: 'Segoe UI', -apple-system, BlinkMacSystemFont, Roboto, Helvetica, Arial, sans-serif;
+    color: #1a202c;
+    line-height: 1.55;
+    font-size: 10.5pt;
+    background: #ffffff;
+    margin: 0;
+    padding: 0;
+  }
+  .header-banner {
+    background: linear-gradient(135deg, #1e3a8a 0%, #3b82f6 100%);
+    color: white;
+    padding: 24px 28px;
+    border-radius: 8px;
+    margin-bottom: 25px;
+  }
+  .header-banner h1 {
+    color: #ffffff;
+    margin: 0 0 8px 0;
+    font-size: 22pt;
+    border-bottom: none;
+    letter-spacing: -0.5px;
+  }
+  .header-banner p {
+    color: #e0e7ff;
+    margin: 4px 0;
+    font-size: 10pt;
+  }
+  h1 {
+    color: #1e3a8a;
+    font-size: 20pt;
+    border-bottom: 2.5px solid #3b82f6;
+    padding-bottom: 6px;
+    margin-top: 24px;
+    page-break-before: auto;
+  }
+  h2 {
+    color: #1e40af;
+    font-size: 14pt;
+    border-bottom: 1.5px solid #e2e8f0;
+    padding-bottom: 4px;
+    margin-top: 22px;
+    page-break-after: avoid;
+  }
+  h3 {
+    color: #334155;
+    font-size: 11.5pt;
+    margin-top: 16px;
+    page-break-after: avoid;
+  }
+  p, li {
+    color: #334155;
+  }
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    margin: 14px 0;
+    font-size: 9pt;
+    page-break-inside: avoid;
+  }
+  th, td {
+    border: 1px solid #cbd5e1;
+    padding: 6px 10px;
+    text-align: left;
+    vertical-align: top;
+  }
+  th {
+    background-color: #f1f5f9;
+    color: #0f172a;
+    font-weight: 600;
+  }
+  tr:nth-child(even) {
+    background-color: #f8fafc;
+  }
+  pre, code {
+    font-family: 'Consolas', 'Courier New', monospace;
+  }
+  code {
+    background-color: #f1f5f9;
+    color: #b91c1c;
+    padding: 2px 5px;
+    border-radius: 4px;
+    font-size: 9pt;
+  }
+  pre {
+    background-color: #0f172a;
+    color: #f8fafc;
+    padding: 12px 14px;
+    border-radius: 6px;
+    overflow-x: auto;
+    font-size: 8.5pt;
+    line-height: 1.45;
+    page-break-inside: avoid;
+  }
+  pre code {
+    background-color: transparent;
+    color: inherit;
+    padding: 0;
+  }
+  blockquote {
+    border-left: 4px solid #3b82f6;
+    padding: 6px 12px;
+    color: #475569;
+    margin: 12px 0;
+    background-color: #f8fafc;
+    border-radius: 0 4px 4px 0;
+  }
+  hr {
+    border: 0;
+    height: 1px;
+    background: #e2e8f0;
+    margin: 22px 0;
+  }
+  .badge {
+    display: inline-block;
+    padding: 3px 8px;
+    background: #dbeafe;
+    color: #1e40af;
+    border-radius: 12px;
+    font-size: 8pt;
+    font-weight: 600;
+    margin-right: 6px;
+  }
+  .mermaid {
+    background: #f8fafc;
+    border: 1px solid #e2e8f0;
+    padding: 10px;
+    border-radius: 6px;
+    font-size: 8.5pt;
+  }
+</style>
+</head>
+<body>
+
+<div class="header-banner">
+  <div style="font-size: 9pt; text-transform: uppercase; letter-spacing: 1px; opacity: 0.9; margin-bottom: 4px;">
+    Department of Computer Science &amp; Engineering &bull; DBMS Lab (3rd Semester)
+  </div>
+  <h1>PROJECT KASHI: Banking Management System</h1>
+  <p><strong>Architecture:</strong> 3-Tier Enterprise Model (HTML5/CSS &bull; Python Flask &bull; MySQL 8.0)</p>
+  <p><strong>Evaluation:</strong> Class Internal Assessment &bull; Maximum Marks: 10/10</p>
+</div>
+
+<h1 id="project-kashi-banking-management-system">PROJECT KASHI: Banking Management System</h1>
+<h2 id="database-management-system-dbms-laboratory-project-report">Database Management System (DBMS) Laboratory Project Report</h2>
+<p><strong>Course:</strong> Database Management Systems (B.Tech CSE - 3rd Semester)<br />
+<strong>Submission Date:</strong> 28th October, 2026<br />
+<strong>Maximum Marks:</strong> 10 (Class Internal Assessment)<br />
+<strong>Technology Stack:</strong> 3-Tier Architecture (Raw HTML5/CSS Frontend, Python Flask Backend, MySQL 8.0 Database)</p>
+<hr />
+<h2 id="1-executive-project-overview">1. Executive Project Overview</h2>
+<p><strong>Project Kashi</strong> is a database-driven Banking Management System designed to simulate core enterprise banking operations. The goal is to apply theoretical Database Management System (DBMS) concepts in an operational software environment. </p>
+<p>The application follows a <strong>strict 3-Tier Architecture</strong>:
+1. <strong>Presentation Layer (Frontend):</strong> Pure HTML5 semantic markup with custom modern Vanilla CSS styling (forms, tables, modal dialogs, passbooks). No complex frontend frameworks (such as React or Vue) are used, ensuring a direct understanding of standard browser-to-server request cycles.
+2. <strong>Application Layer (Backend):</strong> Python with Flask framework handling HTTP routing, session management, input validation, and business logic coordination.
+3. <strong>Data Layer (Database):</strong> MySQL 8.0 relational database engine implementing relational schemas, declarative constraints, views, stored procedures, user-defined functions, triggers, and ACID transactions.</p>
+<hr />
+<h2 id="2-entity-relationship-er-modeling">2. Entity-Relationship (ER) Modeling</h2>
+<h3 id="21-identified-entities-attributes">2.1 Identified Entities &amp; Attributes</h3>
+<p>The system identifies <strong>8 core entities</strong> modeling an enterprise banking domain:</p>
+<table>
+<thead>
+<tr>
+<th style="text-align: left;">Entity</th>
+<th style="text-align: left;">Primary Key</th>
+<th style="text-align: left;">Key Attributes</th>
+<th style="text-align: left;">Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align: left;"><strong><code>BRANCH</code></strong></td>
+<td style="text-align: left;"><code>BranchID</code></td>
+<td style="text-align: left;"><code>BranchName</code>, <code>IFSCCode</code>, <code>Address</code>, <code>City</code>, <code>State</code>, <code>ContactNumber</code></td>
+<td style="text-align: left;">Physical branch offices where accounts and employees belong.</td>
+</tr>
+<tr>
+<td style="text-align: left;"><strong><code>CUSTOMER</code></strong></td>
+<td style="text-align: left;"><code>CustomerID</code></td>
+<td style="text-align: left;"><code>FirstName</code>, <code>LastName</code>, <code>DateOfBirth</code>, <code>Gender</code>, <code>Mobile</code>, <code>Email</code>, <code>Address</code>, <code>City</code>, <code>RegistrationDate</code></td>
+<td style="text-align: left;">Bank clients with unique KYC details (Mobile and Email).</td>
+</tr>
+<tr>
+<td style="text-align: left;"><strong><code>EMPLOYEE</code></strong></td>
+<td style="text-align: left;"><code>EmployeeID</code></td>
+<td style="text-align: left;"><code>EmployeeName</code>, <code>Mobile</code>, <code>Email</code>, <code>Designation</code>, <code>Salary</code>, <code>JoiningDate</code>, <code>BranchID</code></td>
+<td style="text-align: left;">Bank staff operating within a branch.</td>
+</tr>
+<tr>
+<td style="text-align: left;"><strong><code>ACCOUNT</code></strong></td>
+<td style="text-align: left;"><code>AccountID</code></td>
+<td style="text-align: left;"><code>AccountNumber</code>, <code>AccountType</code>, <code>OpeningDate</code>, <code>Balance</code>, <code>Status</code>, <code>BranchID</code></td>
+<td style="text-align: left;">Financial accounts (Saving, Current, Salary) holding liquidity.</td>
+</tr>
+<tr>
+<td style="text-align: left;"><strong><code>ACCOUNT_HOLDER</code></strong></td>
+<td style="text-align: left;"><code>(CustomerID, AccountID)</code></td>
+<td style="text-align: left;"><code>HolderSince</code>, <code>HolderType</code></td>
+<td style="text-align: left;">Associative bridge entity modeling Many-to-Many customer-account relations.</td>
+</tr>
+<tr>
+<td style="text-align: left;"><strong><code>TRANSACTION</code></strong></td>
+<td style="text-align: left;"><code>TransactionID</code></td>
+<td style="text-align: left;"><code>AccountID</code>, <code>TransactionType</code>, <code>Amount</code>, <code>TransactionDate</code>, <code>Description</code>, <code>ReferenceNumber</code>, <code>TransactionStatus</code></td>
+<td style="text-align: left;">Tamper-evident ledger of financial debits and credits.</td>
+</tr>
+<tr>
+<td style="text-align: left;"><strong><code>LOAN</code></strong></td>
+<td style="text-align: left;"><code>LoanID</code></td>
+<td style="text-align: left;"><code>CustomerID</code>, <code>BranchID</code>, <code>LoanType</code>, <code>LoanAmount</code>, <code>InterestRate</code>, <code>StartDate</code>, <code>TenureMonths</code>, <code>LoanStatus</code></td>
+<td style="text-align: left;">Lending contracts sanctioned to customers.</td>
+</tr>
+<tr>
+<td style="text-align: left;"><strong><code>LOAN_PAYMENT</code></strong></td>
+<td style="text-align: left;"><code>PaymentID</code></td>
+<td style="text-align: left;"><code>LoanID</code>, <code>PaymentDate</code>, <code>Amount</code>, <code>PaymentMode</code>, <code>ReferenceNumber</code></td>
+<td style="text-align: left;">Repayment installments credited against sanctioned loans.</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h3 id="22-relationships-cardinality">2.2 Relationships &amp; Cardinality</h3>
+<table>
+<thead>
+<tr>
+<th style="text-align: left;">Relationship</th>
+<th style="text-align: left;">Participating Entities</th>
+<th style="text-align: left;">Cardinality</th>
+<th style="text-align: left;">Ratio</th>
+<th style="text-align: left;">Business Rule</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align: left;"><strong>Employs</strong></td>
+<td style="text-align: left;"><code>BRANCH</code> &rarr; <code>EMPLOYEE</code></td>
+<td style="text-align: left;">$1 : N$ (One-to-Many)</td>
+<td style="text-align: left;">Mandatory ($1$) to Optional ($N$)</td>
+<td style="text-align: left;">A branch employs multiple staff; an employee works at exactly one branch.</td>
+</tr>
+<tr>
+<td style="text-align: left;"><strong>Maintains</strong></td>
+<td style="text-align: left;"><code>BRANCH</code> &rarr; <code>ACCOUNT</code></td>
+<td style="text-align: left;">$1 : N$ (One-to-Many)</td>
+<td style="text-align: left;">Mandatory ($1$) to Optional ($N$)</td>
+<td style="text-align: left;">An account is domiciled at one branch; a branch maintains many accounts.</td>
+</tr>
+<tr>
+<td style="text-align: left;"><strong>Sanctions</strong></td>
+<td style="text-align: left;"><code>BRANCH</code> &rarr; <code>LOAN</code></td>
+<td style="text-align: left;">$1 : N$ (One-to-Many)</td>
+<td style="text-align: left;">Mandatory ($1$) to Optional ($N$)</td>
+<td style="text-align: left;">A loan is approved by a specific branch.</td>
+</tr>
+<tr>
+<td style="text-align: left;"><strong>Holds</strong></td>
+<td style="text-align: left;"><code>CUSTOMER</code> &harr; <code>ACCOUNT</code></td>
+<td style="text-align: left;">$M : N$ (Many-to-Many)</td>
+<td style="text-align: left;">Resolved via <code>ACCOUNT_HOLDER</code></td>
+<td style="text-align: left;">A customer can hold multiple accounts (e.g. Saving + Salary); joint accounts can have multiple owners.</td>
+</tr>
+<tr>
+<td style="text-align: left;"><strong>Records</strong></td>
+<td style="text-align: left;"><code>ACCOUNT</code> &rarr; <code>TRANSACTION</code></td>
+<td style="text-align: left;">$1 : N$ (One-to-Many)</td>
+<td style="text-align: left;">Mandatory ($1$) to Optional ($N$)</td>
+<td style="text-align: left;">An account logs many transactions; every transaction belongs to one account.</td>
+</tr>
+<tr>
+<td style="text-align: left;"><strong>Borrows</strong></td>
+<td style="text-align: left;"><code>CUSTOMER</code> &rarr; <code>LOAN</code></td>
+<td style="text-align: left;">$1 : N$ (One-to-Many)</td>
+<td style="text-align: left;">Mandatory ($1$) to Optional ($N$)</td>
+<td style="text-align: left;">A customer can borrow multiple loans; each loan is tied to a primary borrower.</td>
+</tr>
+<tr>
+<td style="text-align: left;"><strong>Repaid Via</strong></td>
+<td style="text-align: left;"><code>LOAN</code> &rarr; <code>LOAN_PAYMENT</code></td>
+<td style="text-align: left;">$1 : N$ (One-to-Many)</td>
+<td style="text-align: left;">Mandatory ($1$) to Optional ($N$)</td>
+<td style="text-align: left;">A loan has many repayment installments over its tenure.</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h3 id="23-visual-er-diagram-mermaid-notation">2.3 Visual ER Diagram (Mermaid Notation)</h3>
+<pre><code class="language-mermaid">erDiagram
+    BRANCH ||--o{ EMPLOYEE : &quot;employs (1:N)&quot;
+    BRANCH ||--o{ ACCOUNT : &quot;maintains (1:N)&quot;
+    BRANCH ||--o{ LOAN : &quot;sanctions (1:N)&quot;
+    CUSTOMER ||--o{ ACCOUNT_HOLDER : &quot;has (1:N)&quot;
+    ACCOUNT ||--o{ ACCOUNT_HOLDER : &quot;held_by (1:N)&quot;
+    ACCOUNT ||--o{ TRANSACTION : &quot;records (1:N)&quot;
+    CUSTOMER ||--o{ LOAN : &quot;borrows (1:N)&quot;
+    LOAN ||--o{ LOAN_PAYMENT : &quot;repaid_via (1:N)&quot;
+
+    BRANCH {
+        int BranchID PK
+        varchar BranchName
+        varchar IFSCCode UK
+        varchar City
+    }
+    CUSTOMER {
+        int CustomerID PK
+        varchar FirstName
+        varchar LastName
+        varchar Mobile UK
+        varchar Email UK
+    }
+    EMPLOYEE {
+        int EmployeeID PK
+        varchar EmployeeName
+        varchar Designation
+        decimal Salary
+        int BranchID FK
+    }
+    ACCOUNT {
+        int AccountID PK
+        varchar AccountNumber UK
+        varchar AccountType
+        decimal Balance
+        varchar Status
+        int BranchID FK
+    }
+    ACCOUNT_HOLDER {
+        int CustomerID PK_FK
+        int AccountID PK_FK
+        date HolderSince
+        varchar HolderType
+    }
+    TRANSACTION {
+        int TransactionID PK
+        int AccountID FK
+        varchar TransactionType
+        decimal Amount
+        varchar ReferenceNumber UK
+    }
+    LOAN {
+        int LoanID PK
+        int CustomerID FK
+        int BranchID FK
+        varchar LoanType
+        decimal LoanAmount
+        decimal InterestRate
+    }
+    LOAN_PAYMENT {
+        int PaymentID PK
+        int LoanID FK
+        decimal Amount
+        varchar PaymentMode
+        varchar ReferenceNumber UK
+    }
+</code></pre>
+<hr />
+<h2 id="3-relational-schema-design-constraints">3. Relational Schema Design &amp; Constraints</h2>
+<p>The relational model enforces <strong>Domain Integrity</strong>, <strong>Entity Integrity</strong>, and <strong>Referential Integrity</strong>.</p>
+<pre><code>BRANCH(BranchID [PK], BranchName, IFSCCode [UNIQUE], Address, City, State, ContactNumber, CreatedAt)
+
+CUSTOMER(CustomerID [PK], FirstName, LastName, DateOfBirth, Gender, Mobile [UNIQUE], Email [UNIQUE], Address, City, RegistrationDate)
+
+EMPLOYEE(EmployeeID [PK], EmployeeName, Mobile, Email [UNIQUE], Designation, Salary [CHECK &gt; 0], JoiningDate, BranchID [FK -&gt; BRANCH.BranchID])
+
+ACCOUNT(AccountID [PK], AccountNumber [UNIQUE], AccountType [ENUM], OpeningDate, Balance [CHECK &gt;= 0], Status [ENUM], BranchID [FK -&gt; BRANCH.BranchID])
+
+ACCOUNT_HOLDER(CustomerID [PK, FK -&gt; CUSTOMER.CustomerID ON DELETE CASCADE], AccountID [PK, FK -&gt; ACCOUNT.AccountID ON DELETE CASCADE], HolderSince, HolderType)
+
+TRANSACTION(TransactionID [PK], AccountID [FK -&gt; ACCOUNT.AccountID], TransactionType [ENUM], Amount [CHECK &gt; 0], TransactionDate, Description, ReferenceNumber [UNIQUE], TransactionStatus [ENUM])
+
+LOAN(LoanID [PK], CustomerID [FK -&gt; CUSTOMER.CustomerID], BranchID [FK -&gt; BRANCH.BranchID], LoanType [ENUM], LoanAmount [CHECK &gt; 0], InterestRate [CHECK &gt;= 0], StartDate, TenureMonths [CHECK &gt; 0], LoanStatus [ENUM], CreatedAt)
+
+LOAN_PAYMENT(PaymentID [PK], LoanID [FK -&gt; LOAN.LoanID], PaymentDate, Amount [CHECK &gt; 0], PaymentMode, ReferenceNumber [UNIQUE])
+</code></pre>
+<h3 id="31-constraints-enforced">3.1 Constraints Enforced</h3>
+<ol>
+<li><strong>Primary Key Constraints:</strong> Guarantees uniqueness and non-null values for entity identifiers.</li>
+<li><strong>Foreign Key Constraints:</strong> Enforces referential consistency with <code>ON DELETE CASCADE</code> for junction entities (<code>ACCOUNT_HOLDER</code>) and <code>ON DELETE RESTRICT</code> for master entities to prevent orphaned records.</li>
+<li><strong>Unique Constraints (<code>UNIQUE</code>):</strong> Prevents duplicate entries on <code>IFSCCode</code>, <code>Mobile</code>, <code>Email</code>, <code>AccountNumber</code>, and transaction <code>ReferenceNumber</code>.</li>
+<li><strong>Check Constraints (<code>CHECK</code>):</strong></li>
+<li><code>ACCOUNT.Balance &gt;= 0.00</code>: Prohibits unauthorized negative balances at database engine level.</li>
+<li><code>TRANSACTION.Amount &gt; 0.00</code>: Prevents zero or negative transaction entries.</li>
+<li><code>EMPLOYEE.Salary &gt; 0.00</code>: Enforces positive salary compensation.</li>
+<li><strong>Domain Constraints (<code>ENUM</code>):</strong></li>
+<li><code>AccountType</code>: <code>'Saving'</code>, <code>'Current'</code>, <code>'Salary'</code></li>
+<li><code>Status</code>: <code>'Active'</code>, <code>'Inactive'</code>, <code>'Close'</code></li>
+<li><code>TransactionType</code>: <code>'DEPOSIT'</code>, <code>'WITHDRAWAL'</code>, <code>'TRANSFER_IN'</code>, <code>'TRANSFER_OUT'</code></li>
+</ol>
+<hr />
+<h2 id="4-database-normalization-1nf-to-bcnf-proof">4. Database Normalization (1NF to BCNF Proof)</h2>
+<h3 id="41-first-normal-form-1nf">4.1 First Normal Form (1NF)</h3>
+<ul>
+<li><strong>Requirement:</strong> Each attribute must contain only atomic (indivisible) values, and no repeating groups.</li>
+<li><strong>Compliance:</strong> Customer names are split into <code>FirstName</code> and <code>LastName</code>. Multi-valued contacts are eliminated (each customer has an individual mobile and email string). Address attributes are separated into atomic <code>Address</code>, <code>City</code>, and <code>State</code>.</li>
+</ul>
+<h3 id="42-second-normal-form-2nf">4.2 Second Normal Form (2NF)</h3>
+<ul>
+<li><strong>Requirement:</strong> Must be in 1NF, and all non-key attributes must be fully functionally dependent on the entire primary key (no partial dependencies).</li>
+<li><strong>Compliance:</strong> In <code>ACCOUNT_HOLDER</code>, the composite primary key is <code>(CustomerID, AccountID)</code>. The non-key attributes <code>HolderSince</code> and <code>HolderType</code> depend on <strong>both</strong> the customer and account combination, not on <code>CustomerID</code> alone or <code>AccountID</code> alone. All single-attribute primary key tables are automatically free from partial dependencies.</li>
+</ul>
+<h3 id="43-third-normal-form-3nf">4.3 Third Normal Form (3NF)</h3>
+<ul>
+<li><strong>Requirement:</strong> Must be in 2NF, and no transitive dependency exists (non-key attribute determining another non-key attribute: $X \to Y \to Z$).</li>
+<li><strong>Compliance:</strong> In earlier naive designs, <code>Account</code> contained <code>BranchName</code>, <code>IFSCCode</code>, and <code>BranchCity</code>. Because <code>AccountID \to BranchID \to BranchName</code>, this represented a transitive dependency. By decomposing <code>BRANCH</code> into a separate relation, transitive dependencies are completely eliminated.</li>
+</ul>
+<h3 id="44-boyce-codd-normal-form-bcnf">4.4 Boyce-Codd Normal Form (BCNF)</h3>
+<ul>
+<li><strong>Requirement:</strong> For every functional dependency $X \to Y$, $X$ must be a super key.</li>
+<li><strong>Compliance:</strong> In all 8 tables, every determinant is either a candidate key or primary key. Hence, the database schema is in <strong>BCNF</strong>.</li>
+</ul>
+<hr />
+<h2 id="5-advanced-database-objects">5. Advanced Database Objects</h2>
+<h3 id="51-views-database-abstraction">5.1 Views (Database Abstraction)</h3>
+<ol>
+<li><strong><code>vw_customer_accounts</code>:</strong> Combines <code>CUSTOMER</code>, <code>ACCOUNT_HOLDER</code>, <code>ACCOUNT</code>, and <code>BRANCH</code> to present a single virtual table of customer profiles and active balances.</li>
+<li><strong><code>vw_passbook</code>:</strong> Denormalized audit view connecting <code>TRANSACTION</code>, <code>ACCOUNT</code>, <code>CUSTOMER</code>, and <code>BRANCH</code> for instant customer passbook rendering.</li>
+<li><strong><code>vw_branch_summary</code>:</strong> Aggregates branch liquidity, accounts, employee count, and loan exposure.</li>
+</ol>
+<h3 id="52-stored-procedures-business-logic-transactions">5.2 Stored Procedures (Business Logic &amp; Transactions)</h3>
+<ol>
+<li><strong><code>sp_transfer_funds(p_sender, p_receiver, p_amount, p_desc, OUT status_code, OUT status_msg)</code></strong></li>
+<li>Demonstrates <strong>ACID Transactions</strong>:<ul>
+<li><code>START TRANSACTION;</code></li>
+<li>Uses <code>SELECT ... FOR UPDATE</code> to acquire pessimistic row-level locks on sender and receiver account records.</li>
+<li>Verifies account status (<code>Active</code>) and available balance (<code>Balance &gt;= p_amount</code>).</li>
+<li>Simultaneously debits sender and credits receiver.</li>
+<li>Records paired ledger entries: <code>TRANSFER_OUT</code> and <code>TRANSFER_IN</code>.</li>
+<li>Executes <code>COMMIT;</code> upon success or <code>ROLLBACK;</code> upon any constraint failure.</li>
+</ul>
+</li>
+<li><strong><code>sp_deposit_money</code></strong>: Safely increments account balance and logs deposit transaction.</li>
+<li><strong><code>sp_withdraw_money</code></strong>: Validates sufficient balance, decrements balance, and records withdrawal.</li>
+</ol>
+<h3 id="53-user-defined-stored-functions">5.3 User-Defined Stored Functions</h3>
+<ol>
+<li><strong><code>fn_customer_total_balance(p_cust_id INT) RETURNS DECIMAL(15,2)</code></strong></li>
+<li>Returns the cumulative liquid wealth across all accounts held by a customer.</li>
+<li><strong><code>fn_calculate_emi(p_amount, p_annual_rate, p_tenure_months) RETURNS DECIMAL(10,2)</code></strong></li>
+<li>Implements the standard mathematical financial loan installment formula:
+     $$\text{EMI} = \frac{P \cdot r \cdot (1 + r)^N}{(1 + r)^N - 1}$$
+     where $P = \text{Principal}$, $r = \frac{\text{Annual Rate}}{12 \times 100}$, and $N = \text{Tenure in Months}$.</li>
+</ol>
+<h3 id="54-triggers-automated-event-handling">5.4 Triggers (Automated Event Handling)</h3>
+<ol>
+<li><strong><code>trg_prevent_negative_balance</code> (BEFORE UPDATE ON ACCOUNT):</strong></li>
+<li>Intercepts balance modifications and raises an SQL error (<code>SQLSTATE '45000'</code>) if balance falls below zero.</li>
+<li><strong><code>trg_check_loan_completion</code> (AFTER INSERT ON LOAN_PAYMENT):</strong></li>
+<li>Automatically computes total repayments against the loan's principal amount and updates <code>LoanStatus = 'Closed'</code> when fully settled.</li>
+</ol>
+<hr />
+<h2 id="6-10-meaningful-business-problems-sql-solutions">6. 10 Meaningful Business Problems &amp; SQL Solutions</h2>
+<p>All 10 queries are implemented and executable through the interactive web application console:</p>
+<ol>
+<li><strong>Problem 1 (Top 5 Wealthiest Customers):</strong>
+   <code>sql
+   SELECT c.CustomerID, CONCAT(c.FirstName, ' ', c.LastName) AS CustomerName,
+          COUNT(a.AccountID) AS TotalAccountsOwned, SUM(a.Balance) AS TotalAggregateBalance
+   FROM CUSTOMER c
+   JOIN ACCOUNT_HOLDER ah ON c.CustomerID = ah.CustomerID
+   JOIN ACCOUNT a ON ah.AccountID = a.AccountID
+   WHERE a.Status = 'Active'
+   GROUP BY c.CustomerID, c.FirstName, c.LastName
+   ORDER BY TotalAggregateBalance DESC LIMIT 5;</code></li>
+<li><strong>Problem 2 (Branch Liquidity vs Loan Exposure):</strong> Evaluates asset-liability matching using multi-table derived subqueries and <code>CASE</code> expressions.</li>
+<li><strong>Problem 3 (Dormant Account Detection):</strong> Filters accounts with no transactions within the last 90 days using <code>LEFT JOIN</code> and <code>HAVING</code>.</li>
+<li><strong>Problem 4 (Cross-Selling: Savings + Loan Holders):</strong> Identifies high-engagement customers using <code>IN</code> subqueries.</li>
+<li><strong>Problem 5 (Anti-Money Laundering High-Value Audit):</strong> Tracks all transactions $\ge \text{₹}20,000$ with audit parameters.</li>
+<li><strong>Problem 6 (Staff Productivity &amp; Deposit Volume per Employee):</strong> Calculates staff salaries and deposit volume managed per staff member using <code>NULLIF()</code>.</li>
+<li><strong>Problem 7 (Loan Repayment &amp; Outstanding Recovery):</strong> Computes outstanding principal and repayment percentage using <code>COALESCE</code> and <code>LEFT JOIN</code>.</li>
+<li><strong>Problem 8 (Multi-Account Customers):</strong> Groups customers holding $&gt;1$ account using <code>GROUP_CONCAT</code> and <code>HAVING COUNT() &gt; 1</code>.</li>
+<li><strong>Problem 9 (Cash Velocity Inflow vs Outflow):</strong> Aggregates turnover and average transaction size by transaction type.</li>
+<li><strong>Problem 10 (Geographic Penetration &amp; Demographics):</strong> Evaluates customer volume, average age using <code>TIMESTAMPDIFF(YEAR, DateOfBirth, CURDATE())</code>, and deposits per city.</li>
+</ol>
+<hr />
+<h2 id="7-application-workflow-screen-descriptions">7. Application Workflow &amp; Screen Descriptions</h2>
+<h3 id="71-system-architecture">7.1 System Architecture</h3>
+<pre><code>[ Browser / Client ] 
+        │  (HTTP GET / POST)
+        ▼
+[ Flask Application (Python 3.13) ]
+   ├── Routing (app.py)
+   ├── Template Engine (Jinja2 / Raw HTML)
+   ├── Input Validation &amp; Error Handling
+   └── DB Connector (PyMySQL)
+        │  (SQL / Stored Procedures / Transactions)
+        ▼
+[ MySQL 8.0 Relational Database Engine ]
+   ├── Tables, Constraints, &amp; Indexes
+   ├── Stored Procedures (ACID Transactions)
+   ├── Triggers &amp; Functions
+   └── Virtual Views
+</code></pre>
+<h3 id="72-core-pages">7.2 Core Pages</h3>
+<ul>
+<li><strong><code>/</code> (Executive Dashboard):</strong> Live financial cards (Deposits, Loans, Customers, Branches), recent transactions passbook, and branch liquidity summary.</li>
+<li><strong><code>/customers</code>:</strong> Customer directory with search filter and "Register New Customer" modal dialog.</li>
+<li><strong><code>/customers/&lt;id&gt;</code>:</strong> Profile detailing personal data, total liquid wealth (<code>fn_customer_total_balance</code>), linked accounts, and loan repayment records.</li>
+<li><strong><code>/accounts</code>:</strong> Complete account portfolio with "Open New Account" workflow.</li>
+<li><strong><code>/transactions</code>:</strong> Banking Operations Hub with 3 dedicated operation tabs (Atomic Fund Transfer, Deposit, Withdrawal) and filtered transaction passbook.</li>
+<li><strong><code>/loans</code>:</strong> Loan portfolio with interactive client-side and server-side EMI calculator, loan disbursement modal, and loan payment modal.</li>
+<li><strong><code>/branches</code>:</strong> Branch and employee roster with "Add Branch" and "Add Employee" dialogs.</li>
+<li><strong><code>/analytics</code>:</strong> Interactive console displaying the 10 SQL business problems, explanations, and live execution.</li>
+<li><strong><code>/schema</code>:</strong> Live relational schema inspector with Mermaid ER diagram.</li>
+</ul>
+<hr />
+<h2 id="8-conclusion">8. Conclusion</h2>
+<p>Project Kashi meets and exceeds all requirements set forth for the 3rd Semester DBMS Course Project. It demonstrates real-world database design, data integrity, normalization, views, triggers, stored procedures, ACID transactions, and full-stack integration with raw HTML and Flask.</p>
+</body>
+</html>
