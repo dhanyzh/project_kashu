@@ -100,11 +100,11 @@ def open_account():
                 # Generate Account Number
                 acc_num = get_new_account_number()
 
-                # Insert Account
+                # Insert Account (starts at 0; initial deposit transaction trigger will update balance)
                 cursor.execute("""
                     INSERT INTO ACCOUNT (AccountNumber, AccountType, OpeningDate, Balance, Status, BranchID)
-                    VALUES (%s, %s, %s, %s, 'Active', %s);
-                """, (acc_num, account_type, today, initial_deposit, branch_id))
+                    VALUES (%s, %s, %s, 0.00, 'Active', %s);
+                """, (acc_num, account_type, today, branch_id))
                 account_id = cursor.lastrowid
 
                 # Link Customer and Account in ACCOUNT_HOLDER
@@ -157,19 +157,14 @@ def deposit():
                 flash("Deposit amount must be greater than zero.", "danger")
                 return redirect(url_for("deposit"))
 
-            # Update balance and log transaction
+            # Execute deposit using Stored Procedure sp_deposit & Trigger
             conn = get_connection()
             with conn.cursor() as cursor:
-                cursor.execute("UPDATE ACCOUNT SET Balance = Balance + %s WHERE AccountID = %s;", (amount, account_id))
-                ref = get_ref_number("TXN-DEP")
-                cursor.execute("""
-                    INSERT INTO TRANSACTION (AccountID, TransactionType, Amount, Description, ReferenceNumber, TransactionStatus)
-                    VALUES (%s, 'DEPOSIT', %s, %s, %s, 'SUCCESS');
-                """, (account_id, amount, desc, ref))
+                cursor.execute("CALL sp_deposit(%s, %s, %s);", (account_id, amount, desc))
                 conn.commit()
             conn.close()
 
-            flash(f"₹{amount:,.2f} deposited successfully! Ref No: {ref}", "success")
+            flash(f"₹{amount:,.2f} deposited successfully! (Handled by Stored Procedure sp_deposit)", "success")
             return redirect(url_for("passbook"))
         except Exception as e:
             flash(f"Deposit failed: {str(e)}", "danger")
@@ -201,25 +196,14 @@ def withdraw():
                 flash("Withdrawal amount must be greater than zero.", "danger")
                 return redirect(url_for("withdraw"))
 
+            # Execute withdrawal using Stored Procedure sp_withdraw & Trigger
             conn = get_connection()
             with conn.cursor() as cursor:
-                cursor.execute("SELECT Balance FROM ACCOUNT WHERE AccountID = %s;", (account_id,))
-                row = cursor.fetchone()
-                if not row or row['Balance'] < amount:
-                    flash(f"Withdrawal failed: Insufficient balance. Available: ₹{row['Balance'] if row else 0:,.2f}", "danger")
-                    conn.close()
-                    return redirect(url_for("withdraw"))
-
-                cursor.execute("UPDATE ACCOUNT SET Balance = Balance - %s WHERE AccountID = %s;", (amount, account_id))
-                ref = get_ref_number("TXN-WTH")
-                cursor.execute("""
-                    INSERT INTO TRANSACTION (AccountID, TransactionType, Amount, Description, ReferenceNumber, TransactionStatus)
-                    VALUES (%s, 'WITHDRAWAL', %s, %s, %s, 'SUCCESS');
-                """, (account_id, amount, desc, ref))
+                cursor.execute("CALL sp_withdraw(%s, %s, %s);", (account_id, amount, desc))
                 conn.commit()
             conn.close()
 
-            flash(f"₹{amount:,.2f} withdrawn successfully! Ref No: {ref}", "success")
+            flash(f"₹{amount:,.2f} withdrawn successfully! (Handled by Stored Procedure sp_withdraw)", "success")
             return redirect(url_for("passbook"))
         except Exception as e:
             flash(f"Withdrawal failed: {str(e)}", "danger")
@@ -255,51 +239,14 @@ def transfer():
             flash("Transfer amount must be greater than zero.", "danger")
             return redirect(url_for("transfer"))
 
-        # Execute transfer using ACID Transaction with row locks
+        # Execute transfer using Stored Procedure sp_transfer
         conn = get_connection()
         try:
             with conn.cursor() as cursor:
-                # Check sender balance with row lock
-                cursor.execute("SELECT Balance, Status FROM ACCOUNT WHERE AccountID = %s FOR UPDATE;", (sender_id,))
-                sender_acc = cursor.fetchone()
-                cursor.execute("SELECT Status FROM ACCOUNT WHERE AccountID = %s FOR UPDATE;", (receiver_id,))
-                receiver_acc = cursor.fetchone()
-
-                if not sender_acc or not receiver_acc:
-                    flash("One or both accounts not found.", "danger")
-                    conn.rollback()
-                    return redirect(url_for("transfer"))
-
-                if sender_acc.get('Status') != 'Active' or receiver_acc.get('Status') != 'Active':
-                    flash("Both accounts must be Active to complete transfer.", "danger")
-                    conn.rollback()
-                    return redirect(url_for("transfer"))
-
-                if float(sender_acc.get('Balance', 0)) < amount:
-                    flash("Insufficient balance in sender account.", "danger")
-                    conn.rollback()
-                    return redirect(url_for("transfer"))
-
-                # Debit sender and credit receiver
-                cursor.execute("UPDATE ACCOUNT SET Balance = Balance - %s WHERE AccountID = %s;", (amount, sender_id))
-                cursor.execute("UPDATE ACCOUNT SET Balance = Balance + %s WHERE AccountID = %s;", (amount, receiver_id))
-
-                ref_out = get_ref_number("TXN-OUT")
-                ref_in = get_ref_number("TXN-IN")
-
-                cursor.execute("""
-                    INSERT INTO `TRANSACTION` (AccountID, TransactionType, Amount, Description, ReferenceNumber, TransactionStatus)
-                    VALUES (%s, 'TRANSFER_OUT', %s, %s, %s, 'Success');
-                """, (sender_id, amount, desc, ref_out))
-
-                cursor.execute("""
-                    INSERT INTO `TRANSACTION` (AccountID, TransactionType, Amount, Description, ReferenceNumber, TransactionStatus)
-                    VALUES (%s, 'TRANSFER_IN', %s, %s, %s, 'Success');
-                """, (receiver_id, amount, desc, ref_in))
-
+                cursor.execute("CALL sp_transfer(%s, %s, %s, %s);", (sender_id, receiver_id, amount, desc))
                 conn.commit()
-                flash(f"Transfer of ₹{amount:,.2f} completed successfully! (ACID Transaction Committed)", "success")
-                return redirect(url_for("passbook"))
+            flash(f"Transfer of ₹{amount:,.2f} completed successfully! (Handled by Stored Procedure sp_transfer)", "success")
+            return redirect(url_for("passbook"))
         except Exception as e:
             conn.rollback()
             flash(f"Error during transfer: {str(e)}", "danger")
